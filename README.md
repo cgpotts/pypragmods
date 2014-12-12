@@ -1,7 +1,7 @@
-Bayesian pragmatic models implemented in Python
+Bayesian pragmatic models in Python
 ==========
 
-# Models
+## Models
 
 * The basic Rational Speech Acts model of Frank and Goodman 2012
 * The lexical uncertainty model of Bergen et al. 2012
@@ -16,7 +16,7 @@ pragmatic labor, run
 which runs the main method example given in full at the bottom of
 the file.
 
-# References:
+## References:
 
 Frank, Michael C. and Noah D. Goodman. 2012. Predicting pragmatic
 reasoning in language games. Science 336(6084): 998.
