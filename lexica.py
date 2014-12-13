@@ -30,7 +30,7 @@ class Lexica:
             block_ineffability=False, 
             costs=defaultdict(float), 
             disjunction_cost=0.01,    
-            null_cost=5.0,            
+            nullcost=5.0,            
             unknown_word=None):        
         self.baselexicon = baselexicon                  # A dictionary mapping strings to iteraables.
         self.messages = sorted(self.baselexicon.keys()) # Might get augmented by join closure.
@@ -43,7 +43,7 @@ class Lexica:
         self.block_ineffability = block_ineffability    # Block states without true messages; relevant only if nullsem=False.
         self.costs = costs                              # Cost dict; costs.keys() must contain baselexicon.keys().
         self.disjunction_cost = disjunction_cost        # Cost of a disjunction.
-        self.null_cost = null_cost                      # Should probably be higher than regular messages' costs.
+        self.nullcost = nullcost                        # Should probably be higher than regular messages' costs.
         self.unknown_word = unknown_word                # A message constrained to have a singleton meaning in all lexica.
         # Build the lexical space upon initialization:
         self.lexica = self.get_lexica()
@@ -74,7 +74,7 @@ class Lexica:
         if self.nullsem:
             lexica = self.add_nullsem(lexica)
             self.messages.append(NULL_MSG)
-            self.costs[NULL_MSG] = self.null_cost
+            self.costs[NULL_MSG] = self.nullcost
         return lexica
 
     def add_join_closure(self, lexica):
@@ -127,8 +127,8 @@ class Lexica:
     def display(self, digits=4):
         """Display all the lexica in a readable way"""
         for i, mat in enumerate(self.lexica2matrices()):      
-            display_matrix(mat, rnames=self.messages, cnames=self.states, title="Lex%s" % i, digits=digits)     
-
+            display_matrix(mat, rnames=self.messages, cnames=self.states, title="Lex%s" % i, digits=digits)
+ 
     def __len__(self):
         """Number of lexica that are included after any filtering the user wanted."""
         return len(self.lexica2matrices())
