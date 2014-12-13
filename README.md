@@ -11,27 +11,36 @@ Bayesian pragmatic models in Python
 To see these models are work on an example involving the division of
 pragmatic labor, run
 
-`python pragmods.py`
+```
+python pragmods.py
+```
 
 which runs the main method example given in full at the bottom of
-the file.
+the file. In essence, if one has created a set of lexica `lexica`,
+and used it to instantate a `Pragmod` called `mod`, then then
+different models are accessble with
+
+```
+mod.run_base_model(lexica[0])
+mod.run_uncertainty_model()
+mod.run_anxiety_model()
+mod.run_expertise_model()
+```
+
+## LSA 2015 code
+
+For examples of the anxious experts model in action, see `lsa2015/lsa2015.py`.
+It includes the code for the illustrative examples in Levy and Potts 2015
+(reference below). This code uses `lexica.py` to create a large space of
+lexica for analysis with `pragmod.py`. The same kind of code can be used
+with other models.
 
 ## References
 
-Frank, Michael C. and Noah D. Goodman. 2012. Predicting pragmatic
-reasoning in language games. *Science* 336(6084): 998.
+Frank, Michael C. and Noah D. Goodman. 2012. Predicting pragmatic reasoning in language games. *Science* 336(6084): 998.
 
-Bergen, Leon; Noah D. Goodman; and Roger Levy. 2012. That's what she (could have) said: 
-how alternative utterances affect language use. In Naomi Miyake, David Peebles, and 
-Richard P. Cooper, eds., *Proceedings of the 34th Annual Conference of the Cognitive Science
-Society*, 120&ndash;125. Austin, TX: Cognitive Science Society.
+Bergen, Leon; Noah D. Goodman; and Roger Levy. 2012. That's what she (could have) said: how alternative utterances affect language use. In Naomi Miyake, David Peebles, and Richard P. Cooper, eds., *Proceedings of the 34th Annual Conference of the Cognitive Science Society*, 120&ndash;125. Austin, TX: Cognitive Science Society.
 
-Smith, Nathaniel J.; Noah D. Goodman; and Michael C. Frank. 2013.
-Learning and using language via recursive pragmatic reasoning about
-other agents. In *Advances in Neural Information Processing Systems*
-26, 3039&ndash;3047.
+Smith, Nathaniel J.; Noah D. Goodman; and Michael C. Frank. 2013.  Learning and using language via recursive pragmatic reasoning about other agents. In *Advances in Neural Information Processing Systems* 26, 3039&ndash;3047.
 
-Levy, Roger and Christopher Potts. 2015. Negotiating lexical
-uncertainty and expertise with disjunction. Poster presented at the
-89th Meeting of the Linguistic Society of America, Portland, OR,
-January 8&ndash;11.
+Levy, Roger and Christopher Potts. 2015. Negotiating lexical uncertainty and expertise with disjunction. Poster presented at the 89th Meeting of the Linguistic Society of America, Portland, OR, January 8&ndash;11.
