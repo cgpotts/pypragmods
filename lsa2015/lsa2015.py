@@ -65,11 +65,6 @@ def Hurfordian_Contexts():
 def Definitional_Contexts():
     generic_example(alpha=5.0, beta=7.0, disjunction_cost=0.01)
 
-
-######################################################################
-##### Characterization
-
-
     
 if __name__ == '__main__':
 
