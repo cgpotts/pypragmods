@@ -42,6 +42,7 @@
 
 import numpy as np
 from utils import rownorm, colnorm, safelog, display_matrix
+from lexica import DISJUNCTION_SIGN, NULL_MSG
 
 ######################################################################
         
@@ -184,7 +185,7 @@ class Pragmod:
     def display_expertise_iteration(self, langs, digits=4):        
         level = 1
         for index in range(0, len(langs)-1, 2):
-            self.display_joint_listener_matrices(langs[index], level=1, digits=digits)
+            self.display_joint_listener_matrices(langs[index], level=level, digits=digits)
             self.display_listener_matrix(self.listener_lexical_marginalization(langs[index]), title="%s - marginalized" % level, digits=digits)                        
             level += 1
             self.display_expert_speaker_matrices(langs[index+1], level=level, digits=digits)
@@ -207,7 +208,7 @@ class Pragmod:
         display_matrix(mat, title='L%s' % title, rnames=self.messages, cnames=self.meanings, digits=digits)
 
     def display_joint_listener(self, mat, title='', digits=4):
-        lexnames = ['Lex%s' % i for i in range(len(self.lexica))]
+        lexnames = ['Lex%s: %s' % (i, self.lex2str(lex)) for i, lex in enumerate(self.lexica)]
         display_matrix(mat, rnames=lexnames, cnames=self.meanings, title=title, digits=digits)        
 
     def display_joint_listener_matrices(self, mats, level=1, digits=4):
@@ -218,6 +219,16 @@ class Pragmod:
         reconfig = np.transpose(mats, axes=(2,1,0))
         [self.display_speaker_matrix(mat, title='%s - Lex%s' % (level, i), digits=digits) for i, mat in enumerate(reconfig)]
 
+    def lex2str(self, lex):
+        def state_sorter(x):
+            return sorted(x, cmp=(lambda x, y: cmp(len(x), len(y))))
+        entries = []
+        for i, msg in enumerate(self.messages):
+            if msg != NULL_MSG and DISJUNCTION_SIGN not in msg:
+                sem = [w for j, w in enumerate(self.meanings) if lex[i,j] > 0.0 if DISJUNCTION_SIGN not in w]
+                entry = msg + "={" + ",".join(state_sorter(sem)) + "}"
+                entries.append(entry)
+        return "; ".join(entries)        
 
         
 if __name__ == '__main__':
