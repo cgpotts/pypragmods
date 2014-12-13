@@ -27,7 +27,7 @@ def display_matrix(mat, rnames=None, cnames=None, title='', digits=4):
     print ''.rjust(rowlabelwidth) + "".join([str(s).rjust(cwidth) for s in cnames])        
     for i in range(mat.shape[0]):  
         print str(rnames[i]).rjust(rowlabelwidth) + "".join(str(x).rjust(cwidth) for x in mat[i, :])
-        
+
 def powerset(x, minsize=1, maxsize=None):
     result = []
     if maxsize == None: maxsize = len(x)
