@@ -134,50 +134,48 @@ class Pragmod:
         return rownorm(np.sum(result, axis=0))
 
     def UncertaintyAnxietyListener(self, marginalize=False):
-        """Social anxiety listener of Smith et al. 2013."""
-        lik = self.lex_lik()
+        """Social anxiety listener of Smith et al. 2013."""        
+        lik = self.lex_lik()                
         result = np.array([(self.l1(lex).T * lik[i]).T for i, lex in enumerate(self.lexica)])
         if marginalize:
-            result = np.sum(result, axis=0)
-        return result
+            return np.sum(result, axis=0)
+        else:
+            return np.transpose(result, axes=(1,0,2)) 
                        
     def lex_lik(self):
-        """Creates a lexicon x utterance matrix, normalized columnwise for P(Lex|u)."""
+        """Creates a lexicon x utterance matrix, normalized columnwise for P(Lex|msg)."""
         p = np.array([np.sum(self.s1(lex), axis=0) * self.lexprior[i] for i, lex in enumerate(self.lexica)])
         return colnorm(p)
 
     def ExpertiseSpeaker(self, listeners):
-        """Expertise speaker"""
-        lis = np.sum(listeners, axis=0)
-        lexprobs = np.sum(listeners, axis=2)                   
-        result = np.zeros((len(self.messages), len(self.meanings), len(self.lexica)))
-        for u in range(len(self.messages)):
+        """Expertise speaker: 3d array containing P(msg | meaning, lexicon)"""
+        lis = np.sum(listeners, axis=1)
+        lexprobs = np.sum(listeners, axis=2).T
+        result = np.zeros((len(self.lexica), len(self.meanings), len(self.messages)))
+        for l in range(len(self.lexica)):
             for m in range(len(self.meanings)):
-                for l in range(len(self.lexica)):
-                    result[u,m,l] = np.exp(self.temperature * ((self.alpha*safelog(lis[u,m])) + (self.beta*safelog(lexprobs[l,u])) - self.costs[u]))
-        return result / np.sum(result, axis=0)
+                for u in range(len(self.messages)):
+                    result[l,m,u] = np.exp(self.temperature * ((self.alpha*safelog(lis[u,m])) + (self.beta*safelog(lexprobs[l,u])) - self.costs[u]))
+        return (result.T / np.sum(result.T, axis=0)).T
 
     def ExpertiseListener(self, speakers):
-        """Expertise listener"""              
-        result = np.zeros((len(self.lexica), len(self.messages), len(self.meanings)))
-        for k in range(len(self.lexica)):                    
-            for i in range(len(self.messages)):
-                for j in range(len(self.meanings) ):
-                    result[k,i,j] = speakers[i][j,k] * self.prior[j] * self.lexprior[k]
-        totals = np.sum(result, axis=(0, 2))
-        return np.array([(r.T / totals).T for r in result])
+        """Expertise listener: for each message, a joint <lexicon, meaning> table"""            
+        result = np.zeros((len(self.messages), len(self.lexica), len(self.meanings)))
+        for u in range(len(self.messages)):
+            for l in range(len(self.lexica)):                                
+                for m in range(len(self.meanings)):
+                    result[u,l,m] = speakers[l,m,u] * self.prior[m] * self.lexprior[l]
+        totals = np.sum(result, axis=(1, 2))
+        return (result.T / totals.T).T
 
     ##################################################################
     #### Return to simple signaling for joint models
 
     def listener_lexical_marginalization(self, lismat):
-        return np.sum(lismat, axis=0)
+        return np.sum(lismat, axis=1)
 
     def speaker_lexical_marginalization(self, spkmat):
-        spk = np.zeros((len(self.messages), len(self.meanings)))
-        for j, u in enumerate(spkmat): 
-            spk[j] += np.sum(u, axis=1)
-        return rownorm(spk.T)
+        return rownorm(np.sum(spkmat, axis=0))
         
     ##################################################################
     ##### Display functions
@@ -212,12 +210,10 @@ class Pragmod:
         display_matrix(mat, rnames=lexnames, cnames=self.meanings, title=title, digits=digits)        
 
     def display_joint_listener_matrices(self, mats, level=1, digits=4):
-        reconfig = np.transpose(mats, axes=(1,0,2)) 
-        [self.display_joint_listener(mat, title='L%s - %s' % (level, self.messages[i]), digits=digits) for i, mat in enumerate(reconfig)]
+        [self.display_joint_listener(mat, title='L%s - %s' % (level, self.messages[i]), digits=digits) for i, mat in enumerate(mats)]
         
     def display_expert_speaker_matrices(self, mats, level=1, digits=4):
-        reconfig = np.transpose(mats, axes=(2,1,0))
-        [self.display_speaker_matrix(mat, title='%s - Lex%s' % (level, i), digits=digits) for i, mat in enumerate(reconfig)]
+        [self.display_speaker_matrix(mat, title='%s - Lex%s' % (level, i), digits=digits) for i, mat in enumerate(mats)]
 
     def lex2str(self, lex):
         def state_sorter(x):
@@ -290,6 +286,6 @@ if __name__ == '__main__':
     mod.display_listener_matrix(ualangs[-1], title=" - The anxiety/uncertainty model")
     
     # Lexical uncertainty with anxious experts:
-    expertlangs = mod.run_expertise_model(n=n, display=False)
+    expertlangs = mod.run_expertise_model(n=n, display=True)
     mod.display_listener_matrix(mod.listener_lexical_marginalization(expertlangs[-1]), title=" - The anxious experts model")
 
