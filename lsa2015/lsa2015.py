@@ -12,8 +12,6 @@
 #
 ######################################################################
 
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import sys
 sys.path.append('../')
@@ -67,8 +65,7 @@ def generic_example(alpha=1.0, beta=1.0, disjunction_cost=1.0):
         
 def Hurfordian_Contexts():
     generic_example(alpha=2.0, beta=1.0, disjunction_cost=1.0)
-    
-    
+        
 def Definitional_Contexts():
     generic_example(alpha=5.0, beta=7.0, disjunction_cost=0.01)
 
