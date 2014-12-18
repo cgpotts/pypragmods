@@ -5,16 +5,16 @@ Bayesian pragmatic models in Python
 
 * The basic Rational Speech Acts model of Frank and Goodman 2012
 * The lexical uncertainty model of Bergen et al. 2012
-* The anxiety/uncertianty model of Smith et al. 2013
+* The anxiety/uncertainty model of Smith et al. 2013
 * The anxious experts model of Levy and Potts 2015
 
-To see these models are work on an example involving the division of pragmatic labor, run
+To see these models at work on an example involving the division of pragmatic labor, run
 
 ```
 python pragmods.py
 ```
 
-which runs the main method example given in full at the bottom of the file. In essence, if one has created a set of lexica `lexica`, and used it to instantate a `Pragmod` called `mod`, then then different models are accessble with
+which runs the main method example given in full at the bottom of the file. In essence, if one has created a set of lexica `lexica`, and used it to instantiate a `Pragmod` called `mod`, then the different models are accessible with
 
 ```
 mod.run_base_model(lexica[0])
