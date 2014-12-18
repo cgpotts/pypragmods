@@ -17,6 +17,7 @@ import sys
 from collections import defaultdict
 import cPickle as pickle
 from itertools import product
+import matplotlib
 import matplotlib.pyplot as plt
 sys.path.append('../')
 from lexica import Lexica, NULL_MSG
@@ -88,7 +89,13 @@ def compositional_disjunction():
 ######################################################################
 ##### Hurfordian and disjunction examples
 
-def generic_example(alpha=1.0, beta=1.0, disjunction_cost=1.0, n=2, fulldisplay=False, unknown_word=None):
+def generic_disjunction_example(
+        alpha=1.0,
+        beta=1.0,
+        disjunction_cost=1.0,
+        n=2,
+        fulldisplay=False,
+        unknown_word=None):
     """Common code for our two illustrative examples, which
     differ only in the above keyword parameters. Increase n to see
     greater depths of recursion. use fulldisplay=True to see more
@@ -133,13 +140,13 @@ def generic_example(alpha=1.0, beta=1.0, disjunction_cost=1.0, n=2, fulldisplay=
     return langs
         
 def hurfordian_example(n=2, fulldisplay=False):
-    generic_example(alpha=2.0, beta=1.0, disjunction_cost=1.0, n=n, fulldisplay=fulldisplay)
+    generic_disjunction_example(alpha=2.0, beta=1.0, disjunction_cost=1.0, n=n, fulldisplay=fulldisplay)
         
 def definitional_example(n=2, fulldisplay=False):
-    generic_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay)
+    generic_disjunction_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay)
 
 def focal_definitional_example(n=2, fulldisplay=False):
-    generic_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay, unknown_word='X')  
+    generic_disjunction_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay, unknown_word='X')  
 
 ######################################################################
 ##### Parameter exploration
@@ -156,7 +163,8 @@ class ListenerParameterExperiment:
             results_filename=None,
             results=None,
             plot_filename=None,
-            logx=True):
+            logx=True,
+            xlim=(-3.0, 3.0)):
         # Parameter exploration parameters:
         self.results = results                   # Optionally read in existing results for plotting.
         self.results_filename = results_filename # Output filename for the pickled results.
@@ -170,6 +178,7 @@ class ListenerParameterExperiment:
         # Plotting parameters:
         self.plot_filename = plot_filename       # Optional output filename for the plot; if None, then plt.show().
         self.logx = logx                         # Should the beta/alpha be put on the log scale (default: True)
+        self.xlim = xlim                         # The current default is good for the current settings.
         # Parameters not exposed because assumed
         # fixed; these are here mainly to avoid
         # mistakes and facilitate future work:
@@ -265,7 +274,13 @@ class ListenerParameterExperiment:
         return cls_lex
 
     def alpha_beta_cost_scatterplot(self, hc, defin):
-        """Create the scatterplot with beta/alpha on the x-axis and disjunction costs on the y-axis"""                
+        """Create the scatterplot with beta/alpha on the x-axis and disjunction costs on the y-axis"""
+        # High-level plotting styles:
+        plt.style.use('ggplot')
+        matplotlib.rc('text', usetex=True)
+        matplotlib.rc('font', family='serif', serif='cm10')
+        matplotlib.rcParams['text.latex.preamble'] = [r"\usepackage{amsmath}", r'\boldmath']
+        # Set-up:
         transform = np.log if self.logx else (lambda x : x)    
         fig, ax = plt.subplots(nrows=1, ncols=1)
         fig.set_figheight(10)
@@ -296,9 +311,14 @@ class ListenerParameterExperiment:
         xlab = r"\beta/\alpha"    
         if self.logx:
             xlab = r"\log(%s)" % xlab
-        ax.set_xlabel(r'$%s$' % xlab, fontsize=labsize)
-        ax.set_ylabel(r'$C(or)$', fontsize=labsize)
+        ax.set_xlabel(r'$%s$' % xlab, fontsize=labsize, color='black')
+        ax.set_ylabel(r'$C(or)$', fontsize=labsize, color='black')
         ax.legend(loc='upper left', bbox_to_anchor=(0,1.1), ncol=3, fontsize=labsize)
+        # Ticks and bounds:
+        if self.xlim:
+            x1,x2,y1,y2 = ax.axis()
+            x1, x2 = self.xlim
+            ax.axis((x1, x2, y1, y2))
         plt.setp(ax.get_xticklabels(), fontsize=ticksize)
         plt.setp(ax.get_yticklabels(), fontsize=ticksize)
         if self.plot_filename:
@@ -332,11 +352,15 @@ if __name__ == '__main__':
     ## Parameter exploration with a large lexicon; this takes a long time to run!
     # ListenerParameterExperiment(
     #     results_filename='paramexplore-lex5.pickle',
+    #     # If the results are already computed:
+    #     # results=pickle.load(file("paramexplore-lex5.pickle")),
     #     plot_filename='paramexplore-lex5.pdf').run()
 
     ## Parameter exploration as above but constraining the unknown word X to an atomic meaning:
     # ListenerParameterExperiment(
     #     results_filename='paramexplore-lex5-focal.pickle',
+    #     # If the results are already computed:
+    #     # results=pickle.load(file("paramexplore-lex5-focal.pickle")),
     #     plot_filename='paramexplore-lex5-focal.pdf',
     #     unknown_word='X').run()
     
