@@ -8,17 +8,13 @@ Bayesian pragmatic models in Python
 * The anxiety/uncertianty model of Smith et al. 2013
 * The anxious experts model of Levy and Potts 2015
 
-To see these models are work on an example involving the division of
-pragmatic labor, run
+To see these models are work on an example involving the division of pragmatic labor, run
 
 ```
 python pragmods.py
 ```
 
-which runs the main method example given in full at the bottom of
-the file. In essence, if one has created a set of lexica `lexica`,
-and used it to instantate a `Pragmod` called `mod`, then then
-different models are accessble with
+which runs the main method example given in full at the bottom of the file. In essence, if one has created a set of lexica `lexica`, and used it to instantate a `Pragmod` called `mod`, then then different models are accessble with
 
 ```
 mod.run_base_model(lexica[0])
@@ -29,11 +25,8 @@ mod.run_expertise_model()
 
 ## LSA 2015 code
 
-For examples of the anxious experts model in action, see `lsa2015/lsa2015.py`.
-It includes the code for the illustrative examples in Levy and Potts 2015
-(reference below). This code uses `lexica.py` to create a large space of
-lexica for analysis with `pragmod.py`. The same kind of code can be used
-with other models.
+For examples of the anxious experts model in action, see `lsa2015/lsa2015.py`. It includes the code for the illustrative examples in Levy and Potts 2015 (reference below). In particular, the function `compositional_disjunction` shows how to use `lexica.py` to create a space of lexica for analysis with `pragmod.py`. 
+
 
 ## References
 
