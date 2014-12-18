@@ -88,7 +88,7 @@ def compositional_disjunction():
 ######################################################################
 ##### Hurfordian and disjunction examples
 
-def generic_example(alpha=1.0, beta=1.0, disjunction_cost=1.0, n=2, fulldisplay=False):
+def generic_example(alpha=1.0, beta=1.0, disjunction_cost=1.0, n=2, fulldisplay=False, unknown_word=None):
     """Common code for our two illustrative examples, which
     differ only in the above keyword parameters. Increase n to see
     greater depths of recursion. use fulldisplay=True to see more
@@ -102,7 +102,8 @@ def generic_example(alpha=1.0, beta=1.0, disjunction_cost=1.0, n=2, fulldisplay=
         join_closure=True,
         nullsem=True,
         nullcost=5.0,
-        disjunction_cost=disjunction_cost)
+        disjunction_cost=disjunction_cost,
+        unknown_word=unknown_word)
     # Lexical matrices:
     lexmats = lexica.lexica2matrices()         
     # Pragmatic models for the above lexical space.
@@ -135,7 +136,10 @@ def hurfordian_example(n=2, fulldisplay=False):
     generic_example(alpha=2.0, beta=1.0, disjunction_cost=1.0, n=n, fulldisplay=fulldisplay)
         
 def definitional_example(n=2, fulldisplay=False):
-    generic_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay)   
+    generic_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay)
+
+def focal_definitional_example(n=2, fulldisplay=False):
+    generic_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay, unknown_word='X')  
 
 ######################################################################
 ##### Parameter exploration
@@ -323,7 +327,8 @@ if __name__ == '__main__':
     ## From the poster:
     hurfordian_example(n=2, fulldisplay=False)
     definitional_example(n=3, fulldisplay=False)
-
+    focal_definitional_example(n=2, fulldisplay=True)
+    
     ## Parameter exploration with a large lexicon; this takes a long time to run!
     # ListenerParameterExperiment(
     #     results_filename='paramexplore-lex5.pickle',
