@@ -172,15 +172,18 @@ class Pragmod:
     #### Return to simple signaling for joint models
 
     def listener_lexical_marginalization(self, lismat):
+        """Return to state/message signaling by marginalizing over lexica"""
         return np.sum(lismat, axis=1)
 
     def speaker_lexical_marginalization(self, spkmat):
+        """Return to state/message signaling by marginalizing over lexica"""
         return rownorm(np.sum(spkmat, axis=0))
         
     ##################################################################
     ##### Display functions
 
-    def display_expertise_iteration(self, langs, digits=4):        
+    def display_expertise_iteration(self, langs, digits=4):
+        """Display the full iteration for any the expertise model"""       
         level = 1
         for index in range(0, len(langs)-1, 2):
             self.display_joint_listener_matrices(langs[index], level=level, digits=digits)
@@ -190,6 +193,7 @@ class Pragmod:
             self.display_speaker_matrix(self.speaker_lexical_marginalization(langs[index+1]), title='%s - marginalized' % level, digits=digits)
             
     def display_iteration(self, langs, start_level=0, digits=4):
+        """Display the full iteration for any model except expertise"""
         self.display_listener_matrix(langs[0], title=start_level, digits=digits)        
         start_level += 1
         display_funcs = (self.display_speaker_matrix, self.display_listener_matrix)
@@ -198,24 +202,28 @@ class Pragmod:
             if i % 2: start_level += 1
 
     def display_speaker_matrix(self, mat, title='', digits=4):
-        """Pretty-printed speaker matrix to standard output"""
+        """Pretty-printed (to stdout) speaker matrix to standard output"""
         display_matrix(mat, title='S%s' % title, rnames=self.meanings, cnames=self.messages, digits=digits)
 
     def display_listener_matrix(self, mat, title='', digits=4):
-        """Pretty-printed listener matrix to standard output"""
+        """Pretty-printed (to stdout) listener matrix to standard output"""
         display_matrix(mat, title='L%s' % title, rnames=self.messages, cnames=self.meanings, digits=digits)
 
     def display_joint_listener(self, mat, title='', digits=4):
+        """Pretty-printed (to stdout) lexicon x world joint probability table for a given message"""
         lexnames = ['Lex%s: %s' % (i, self.lex2str(lex)) for i, lex in enumerate(self.lexica)]
         display_matrix(mat, rnames=lexnames, cnames=self.meanings, title=title, digits=digits)        
 
     def display_joint_listener_matrices(self, mats, level=1, digits=4):
+        """Pretty-printed (to stdout) lexicon x world joint probability table for all messages"""
         [self.display_joint_listener(mat, title='L%s - %s' % (level, self.messages[i]), digits=digits) for i, mat in enumerate(mats)]
         
     def display_expert_speaker_matrices(self, mats, level=1, digits=4):
-        [self.display_speaker_matrix(mat, title='%s - Lex%s' % (level, i), digits=digits) for i, mat in enumerate(mats)]
+        """Pretty-printed (to stdout) list of world x message conditional probability tables, one for each lexicon"""
+        [self.display_speaker_matrix(mat, title='%s - Lex%s %s' % (level, i, self.lex2str(self.lexica[i])), digits=digits) for i, mat in enumerate(mats)]
 
     def lex2str(self, lex):
+        """Format a lexicon for easy inspection"""
         def state_sorter(x):
             return sorted(x, cmp=(lambda x, y: cmp(len(x), len(y))))
         entries = []
