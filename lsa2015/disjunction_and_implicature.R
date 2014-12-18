@@ -19,10 +19,10 @@ library(ggplot2)
 ######################################################################
 
 ## Dataset extending Chemla's numbers with the more reliable Google Books (version 2) counts:
-dat <- read.csv("vantiel-chemla-googlebooks2.csv",1)
+dat = read.csv("vantiel-chemla-googlebooks2.csv",1)
 
-## Y-axis values (dependent variable)
-dat$ratio <- dat$GB2.Freq.X.or.Y / dat$GB2.Freq.X
+## Y-axis values (dependent variable):
+dat$ratio = dat$GB2.Freq.X.or.Y / dat$GB2.Freq.X
 
 ## Plotting params:
 xlab = "Probability of X implicating not-Y [from 42]"
