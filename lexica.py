@@ -20,6 +20,7 @@ from utils import powerset, display_matrix
 
 NULL_MSG = 'NULL'
 DISJUNCTION_SIGN = ' v '
+CONJUNCTION_SIGN = ' & '
 
 class Lexica:
     def __init__(self,
@@ -68,8 +69,9 @@ class Lexica:
         # Close the lexica:
         if self.join_closure:
             lexica = self.add_join_closure(lexica)
-            self.messages += [DISJUNCTION_SIGN.join(sorted(set(cm))) for cm in powerset(sorted(self.baselexicon.keys()), minsize=2)]
-            self.states += [DISJUNCTION_SIGN.join(sorted(set(sem))) for sem in powerset(self.atomic_states, minsize=2)]            
+            atomic_messages = sorted([x for x in self.baselexicon.keys() if CONJUNCTION_SIGN not in x])
+            self.messages += [DISJUNCTION_SIGN.join(sorted(set(cm))) for cm in powerset(atomic_messages, minsize=2)]
+            self.states += [DISJUNCTION_SIGN.join(sorted(set(sem))) for sem in powerset(self.atomic_states, minsize=2)]                   
         # Add nullsem last so that it doesn't participate in any closures (and displays last in matrices):
         if self.nullsem:
             lexica = self.add_nullsem(lexica)
@@ -79,11 +81,12 @@ class Lexica:
 
     def add_join_closure(self, lexica):
         """Close the atomic messages and atomic states under joins"""
-        return self.add_closure(lexica=lexica, connective=DISJUNCTION_SIGN, combo_func=(lambda x,y : x | y), cost_value=self.disjunction_cost)   
-
+        return self.add_closure(lexica=lexica, connective=DISJUNCTION_SIGN, combo_func=(lambda x,y : x | y), cost_value=self.disjunction_cost)
+   
     def add_closure(self, lexica=None, connective=None, combo_func=None, cost_value=None):
         """Generic function for adding closures."""
-        complex_msgs = [connective.join(sorted(set(cm))) for cm in powerset(sorted(self.baselexicon.keys()), minsize=1)] + self.messages
+        atomic_messages = sorted([x for x in self.baselexicon.keys() if CONJUNCTION_SIGN not in x])
+        complex_msgs = [connective.join(sorted(set(cm))) for cm in powerset(atomic_messages, minsize=1)]
         for i, lex in enumerate(lexica):
             for cm in complex_msgs:
                 # Get all the worlds consistent with the complex message:
