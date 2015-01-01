@@ -12,15 +12,15 @@ from itertools import product
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
-from utils import *
 import bootstrap
+from settings import *
 
 ######################################################################
 # Clas for modeling experimental items (rows in the table):
 
 class Item:
     def __init__(self, data):
-        # Attributes for embedded-scalars-experiment-results.csv:
+        # Attributes for embeddedscalars-experiment-results.csv:
         #
         # workerid,
         # Answer.language,
@@ -53,7 +53,7 @@ class Item:
 # Class for the entire experiment, built from the spreadsheet:
     
 class Experiment:
-    def __init__(self, src_filename="embedded-scalars-experiment-results.csv"):        
+    def __init__(self, src_filename=EXPERIMENT_SRC_FILENAME):        
         self.src_filename = src_filename
         self.data = [Item(d) for d in csv.DictReader(file(src_filename))]
         self.targets = defaultdict(lambda : defaultdict(list))
@@ -227,8 +227,8 @@ class Experiment:
     
 if __name__ == '__main__':
 
-    exp = Experiment(src_filename='embedded-scalars-experiment-results.csv')
-    #exp.plot_targets(output_filename="embedded-scalars-experiment-results.pdf")   
+    exp = Experiment(src_filename=EXPERIMENT_SRC_FILENAME)
+    #exp.plot_targets(output_filename=EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf'))
     exp.experimental_report()
 
 

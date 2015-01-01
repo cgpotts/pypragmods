@@ -8,7 +8,9 @@ import sys
 import itertools
 import numpy as np
 from fragment import *
-from utils import display_matrix, powerset, NULL
+from settings import NULL
+sys.path.append('../')
+from utils import display_matrix, powerset
 
 ######################################################################
 

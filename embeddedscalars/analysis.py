@@ -12,6 +12,8 @@ from collections import defaultdict
 from itertools import product
 import numpy as np
 from scipy.stats import spearmanr, pearsonr
+from settings import *
+sys.path.append('../')
 from utils import *
 
 ######################################################################

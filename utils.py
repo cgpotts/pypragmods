@@ -35,3 +35,8 @@ def powerset(x, minsize=1, maxsize=None):
         for val in combinations(x, i):
             result.append(list(val))
     return result
+
+def mse(x, y):
+    """Mean squared error"""
+    err = np.sqrt(np.sum((x-y)**2)/len(x))
+    return err

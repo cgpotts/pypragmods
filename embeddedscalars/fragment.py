@@ -8,12 +8,11 @@
 
 import sys
 from itertools import product
+from settings import *
+sys.path.append('../')
 from utils import powerset
 
 ######################################################################
-
-a = 'a'; b = 'b'; c = 'c'
-s1 = 's1' ; s2 = 's2'
 
 def define_lexicon(player=[], shot=[], worlds=[]):
     D_et = powerset(player+shot)

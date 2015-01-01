@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 
 ######################################################################
-# Common strings and some nuts-and-bolts functions used in the paper.
+# Common strings and some nuts-and-bolts stuff used in the paper.
 ######################################################################
 
-import itertools
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+
+EXPERIMENT_SRC_FILENAME = 'embeddedscalars-experiment-results.csv'
+
+######################################################################
+# Model-theoretic entities:
+
+a = 'a'; b = 'b'; c = 'c'
+s1 = 's1' ; s2 = 's2'
 
 ######################################################################
 # Plot set-up
@@ -72,47 +78,4 @@ CONDITION_MAP = {
 
 # Separate vector to ensure the desired ordering:
 CONDITIONS = ("NNN", "NNS", "NNA", "NAA", "NSS", "NSA", "SSS", "SSA", "SAA", "AAA")
-
-######################################################################
-# Utility functions
-
-def rownorm(mat):
-    """Row normalization of a matrix"""
-    return np.divide(mat.T, np.sum(mat, axis=1)).T
-    
-def colnorm(mat):
-    """Column normalization of a matrix"""    
-    return np.divide(mat, np.sum(mat, axis=0))
-
-def safelog(vals):           
-    with np.errstate(divide='ignore'):
-        return np.log(vals)
-
-def display_matrix(mat, display=True, rnames=None, cnames=None, title='', digits=4):
-    """Utility function for displaying strategies to standard output.
-    The display parameter saves a lot of conditionals in the important code"""
-    if display:
-        mat = np.round(mat, digits)
-        rowlabelwidth = 2 + max([len(x) for x in rnames+cnames] + [digits+2])
-        cwidth = 2 + max([len(x) for x in cnames] + [digits+2])
-        # Divider bar of the appropriate width:
-        print "-" * (cwidth * (max(len(cnames), len(rnames)) + 1))
-        print title
-        # Matrix with even-width columns wide enough for the data:
-        print ''.rjust(rowlabelwidth) + "".join([str(s).rjust(cwidth) for s in cnames])        
-        for i in range(mat.shape[0]):  
-            print str(rnames[i]).rjust(rowlabelwidth) + "".join(str(x).rjust(cwidth) for x in mat[i, :])    
-
-def powerset(x, minsize=0, maxsize=None):
-    result = []
-    if maxsize == None: maxsize = len(x)
-    for i in range(minsize, maxsize+1):
-        for val in itertools.combinations(x, i):
-            result.append(list(val))
-    return result
-
-def mse(x, y):
-    """Mean squared error"""
-    err = np.sqrt(np.sum((x-y)**2)/len(x))
-    return err
 

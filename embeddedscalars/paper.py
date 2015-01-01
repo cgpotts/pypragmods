@@ -7,14 +7,18 @@
 ######################################################################
 
 import sys
+import numpy as np
 from copy import copy
+from itertools import product
 from grammar import UncertaintyGrammars
-from utils import display_matrix
-sys.path.append('../')
 from pragmods import Pragmod
-from experiment import *
-from fragment import *
-from analysis import *
+from settings import EXPERIMENT_SRC_FILENAME
+from settings import a, b, c, s1, s2 # model-theoretic entities
+from fragment import define_lexicon, get_worlds, worldname
+from experiment import Experiment
+from analysis import Analysis
+sys.path.append('../')
+from utils import display_matrix
 
 ######################################################################
 
@@ -47,8 +51,7 @@ def simple_scalar_inference_example():
         print 's1'
         display_matrix(mod.S(lex), rnames=mod.states, cnames=mod.messages, digits=2)
         print 'l1'
-        display_matrix(mod.L(mod.S(lex)), rnames=mod.messages, cnames=mod.states, digits=2)
-        
+        display_matrix(mod.L(mod.S(lex)), rnames=mod.messages, cnames=mod.states, digits=2)        
 
     display_matrix(mod.final_listener,  rnames=mod.messages, cnames=mod.states, digits=2)
             
@@ -113,15 +116,15 @@ def complex_example():
 ######################################################################
 
 def experiment_plot_and_report(
-        src_filename='embedded-scalars-experiment-results.csv',
-        output_filename="embedded-scalars-experiment-results.pdf"):
+        src_filename=EXPERIMENT_SRC_FILENAME,
+        output_filename=EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf')):
     exp = Experiment(src_filename=src_filename)
     exp.experimental_report()
     exp.plot_targets(output_filename=output_filename)
 
 ######################################################################
     
-def experimental_assessment(experiment_src="embedded-scalars-experiment-results.csv",
+def experimental_assessment(experiment_src=EXPERIMENT_SRC_FILENAME,
                             plot_output_filename='allmodels.pdf'):
     # General settings:
     subjs= ('every_player', 'exactly_one_player', 'no_player')
@@ -193,9 +196,9 @@ def experimental_assessment(experiment_src="embedded-scalars-experiment-results.
 
 if __name__ == '__main__':
 
-    #simple_scalar_inference_example()
-    complex_example()
-    #experiment_plot_and_report()
-    #experimental_assessment()
+    simple_scalar_inference_example()
+    # complex_example()
+    # experiment_plot_and_report()
+    # experimental_assessment()
 
 
