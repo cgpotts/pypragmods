@@ -7,13 +7,14 @@
 # - The lexical uncertainty model of Bergen et al. 2012
 # - The anxiety/uncertianty model of Smith et al. 2013
 # - The anxious experts model of Levy and Potts 2015
+# - A streaming lexical uncertainty implementation for large problems.
 #
 # Use
 #
 # python pragmods.py
 #
-# to see an example involving the division of pragmatic labor, using
-# all of the above models.
+# to see an example involving the Levinson/Horn division of pragmatic
+# labor, using  all of the above models.
 #
 # References:
 #
@@ -36,10 +37,16 @@
 # 89th Meeting of the Linguistic Society of America, Portland, OR,
 # January 8-11.
 #
+# Potts, Christopher; Daniel Lassiter; Roger Levy; Michael C. Frank.
+# 2015. Embedded implicatures as pragmatic inferences under
+# compositional lexical uncertainty. Ms., Stanford and UCSD.
+#
 # ---Christopher Potts
 #
 ######################################################################
 
+import sys
+from copy import copy
 import numpy as np
 from utils import rownorm, colnorm, safelog, display_matrix
 from lexica import DISJUNCTION_SIGN, NULL_MSG
@@ -48,31 +55,68 @@ from lexica import DISJUNCTION_SIGN, NULL_MSG
         
 class Pragmod:    
     def __init__(self,
-            lexica=None, 
+            name="",
+            lexica=None,
+            baselexicon=None,
             messages=None, 
-            meanings=None, 
+            states=None, 
             costs=None, 
             prior=None, 
-            lexprior=None, 
+            lexprior=None,
+            lexcount=None, 
             temperature=1.0,
             alpha=1.0,
-            beta=1.0):
+            beta=1.0,
+            nullmsg=True,
+            nullcost=5.0):
+        self.name = name                # optional informal name for the model
         self.lexica = lexica            # list of np.arrays of dimension m x n
+        self.baselexicon = baselexicon  # the starting point for the space of lexica
         self.messages = messages        # list or tuple of strings of length m
-        self.meanings = meanings        # list or tuple of strings of length n
+        self.states = states            # list or tuple of strings of length n
         self.costs = costs              # np.array of length m
         self.prior = prior              # np.array of length n
         self.lexprior = lexprior        # np.array of length len(self.lexica)
+        self.lexcount = lexcount        # number of lexica if known ahead of time
         self.temperature = temperature  # usually \lambda, but lambda is a Python builtin; should be > 0.0
         self.alpha = alpha              # speaker value for the world state
         self.beta = beta                # speaker value for the lexicon
+        self.nullmsg = nullmsg          # whether to assume the final message is null
+        self.nullcost = nullcost        # cost for the nullmsg if there is one
+        ##### More complex default values:
+        # If no state prior is given, define a flat prior over states:
+        if self.prior == None:
+            self.prior = np.repeat(1.0/len(self.states), len(self.states))
+        # If no lexicon prior is given, but we do know the number of lexica,
+        # define a flat prior over lexica. If no count is given, we lead this
+        # undefined and the lexicon prior is implicitly flat.             
+        if self.lexprior == None and self.lexcount != None:
+            self.lexprior = np.repeat(1.0/self.lexcount, self.lexcount)        
+        if self.costs == None:
+            self.costs = np.zeros(len(self.messages))
+            if self.nullmsg:
+                self.costs[-1] = self.nullcost
+        # Convenient access to the most sophisticated agents, filled in by
+        # each iteration model if possible (not always possible for the speaker):
+        self.final_listener = np.zeros((len(self.messages), len(self.states)))
+        self.final_speaker = None        
 
     ##################################################################
     ##### Iteration models
 
     def run_base_model(self, lex, n=2, display=True, digits=4):
-        """Basic model with a specified messages x meanings matrix of truth values lex"""
+        """Basic model with a specified messages x states matrix of truth values lex"""
         return self.run(n=n, display=display, digits=digits, initial_listener=self.l0(lex), start_level=0)
+
+    def rsa(self, lex=None):
+        if not lex:
+            lex = self.baselexicon
+        lit = self.l0(lex)
+        spk = self.S(lit)
+        lis = self.L(spk)
+        self.final_speaker = spk
+        self.final_listener = lis
+        return [lit, spk, lis]
     
     def run_uncertainty_model(self, n=2, display=True, digits=4):
         """The lexical uncertainty model of Bergen et al. 2012, 2014"""
@@ -91,8 +135,13 @@ class Pragmod:
         for i in range(1, (n-1)*2, 2):
             langs.append(self.S(langs[i-1]))
             langs.append(self.L(langs[i]))
+        if len(langs) >= 2:
+            self.final_speaker, self.final_listener = langs[-2: ]
+        else:
+            self.final_speaker = None
+            self.final_listener = langs[-1]
         if display:
-            self.display_iteration(langs, start_level=start_level, digits=digits)        
+            self.display_iteration(langs, start_level=start_level, digits=digits)      
         return langs  
 
     def run_expertise_model(self, n=2, display=True, digits=4):
@@ -102,8 +151,35 @@ class Pragmod:
             langs.append(self.ExpertiseSpeaker(langs[i-1]))
             langs.append(self.ExpertiseListener(langs[i]))
         if display:
-            self.display_expertise_iteration(langs, digits=digits)      
-        return langs  
+            self.display_expertise_iteration(langs, digits=digits)
+        if len(langs) >= 2:
+            self.final_speaker, self.final_listener = langs[-2: ]
+        else:
+            self.final_speaker = None
+            self.final_listener = langs[-1]
+        return langs
+
+    def stream_lexical_uncertainty(self, n=0, display_progress=True):
+        """Separate interface to the lexical uncertainty model that doesn't hold all the
+        lexica in memory -- essential for very large problem spaces."""        
+        # If there is no lexicon prior, then this allows us to ignore it.
+        lexprior_func = (lambda x : 1.0)
+        # Where we have a lexicon prior, we can look up the value in self.lexprior:
+        if self.lexprior != None:
+            lexprior_func = (lambda lexindex : self.lexprior[lexindex])
+        # Iterate through the lexica:
+        for lexindex, lex in enumerate(self.lexica()):
+            if display_progress and lexindex and lexindex % 10**2 == 0:
+                sys.stderr.write('\r'); sys.stderr.write('lexicon %s' % lexindex) ; sys.stderr.flush()
+            self.final_listener += lexprior_func(lexindex) * self.s1(lex).T            
+        # Update or fill in the lexcount based on the iteration:
+        self.lexcount = lexindex + 1
+        # Final normalization and state prior incorporation:
+        self.final_listener = rownorm( self.prior * self.final_listener)
+        # Optional further iteration of L and S with no lexical uncertainty:
+        for i in range(n-1):
+            self.final_speaker = self.S(self.final_listener)
+            self.final_listener = self.L(self.final_speaker)
         
     ##################################################################
     ##### Agents
@@ -151,19 +227,19 @@ class Pragmod:
         """Expertise speaker: 3d array containing P(msg | meaning, lexicon)"""
         lis = np.sum(listeners, axis=1)
         lexprobs = np.sum(listeners, axis=2).T
-        result = np.zeros((len(self.lexica), len(self.meanings), len(self.messages)))
+        result = np.zeros((len(self.lexica), len(self.states), len(self.messages)))
         for l in range(len(self.lexica)):
-            for m in range(len(self.meanings)):
+            for m in range(len(self.states)):
                 for u in range(len(self.messages)):
                     result[l,m,u] = np.exp(self.temperature * ((self.alpha*safelog(lis[u,m])) + (self.beta*safelog(lexprobs[l,u])) - self.costs[u]))
         return (result.T / np.sum(result.T, axis=0)).T
 
     def ExpertiseListener(self, speakers):
         """Expertise listener: for each message, a joint <lexicon, meaning> table"""            
-        result = np.zeros((len(self.messages), len(self.lexica), len(self.meanings)))
+        result = np.zeros((len(self.messages), len(self.lexica), len(self.states)))
         for u in range(len(self.messages)):
             for l in range(len(self.lexica)):                                
-                for m in range(len(self.meanings)):
+                for m in range(len(self.states)):
                     result[u,l,m] = speakers[l,m,u] * self.prior[m] * self.lexprior[l]
         totals = np.sum(result, axis=(1, 2))
         return (result.T / totals.T).T
@@ -203,16 +279,16 @@ class Pragmod:
 
     def display_speaker_matrix(self, mat, title='', digits=4):
         """Pretty-printed (to stdout) speaker matrix to standard output"""
-        display_matrix(mat, title='S%s' % title, rnames=self.meanings, cnames=self.messages, digits=digits)
+        display_matrix(mat, title='S%s' % title, rnames=self.states, cnames=self.messages, digits=digits)
 
     def display_listener_matrix(self, mat, title='', digits=4):
         """Pretty-printed (to stdout) listener matrix to standard output"""
-        display_matrix(mat, title='L%s' % title, rnames=self.messages, cnames=self.meanings, digits=digits)
+        display_matrix(mat, title='L%s' % title, rnames=self.messages, cnames=self.states, digits=digits)
 
     def display_joint_listener(self, mat, title='', digits=4):
         """Pretty-printed (to stdout) lexicon x world joint probability table for a given message"""
         lexnames = ['Lex%s: %s' % (i, self.lex2str(lex)) for i, lex in enumerate(self.lexica)]
-        display_matrix(mat, rnames=lexnames, cnames=self.meanings, title=title, digits=digits)        
+        display_matrix(mat, rnames=lexnames, cnames=self.states, title=title, digits=digits)        
 
     def display_joint_listener_matrices(self, mats, level=1, digits=4):
         """Pretty-printed (to stdout) lexicon x world joint probability table for all messages"""
@@ -229,11 +305,50 @@ class Pragmod:
         entries = []
         for i, msg in enumerate(self.messages):
             if msg != NULL_MSG and DISJUNCTION_SIGN not in msg:
-                sem = [w for j, w in enumerate(self.meanings) if lex[i,j] > 0.0 if DISJUNCTION_SIGN not in w]
+                sem = [w for j, w in enumerate(self.states) if lex[i,j] > 0.0 if DISJUNCTION_SIGN not in w]
                 entry = msg + "={" + ",".join(state_sorter(sem)) + "}"
                 entries.append(entry)
-        return "; ".join(entries)        
+        return "; ".join(entries)
 
+    def listener_report(self, digits=4):
+        print "=" * 70 # Divider bar.
+        print 'Lexica:', self.lexcount
+        print 'Final listener'
+        display_matrix(self.final_listener, rnames=self.messages, cnames=self.states, digits=digits)
+        print '\nBest inferences:'
+        best_inferences = self.get_best_inferences(digits=digits)  
+        for msg, val in sorted(best_inferences.items()):
+            print "\t", msg, val
+        print "\nLaTeX table:\n"
+        print self.final_listener2latex()
+
+    def get_best_inferences(self, digits=4):    
+        best_inferences = {}
+        # Round to avoid tiny distinctions that don't even display:
+        mat = np.round(copy(self.final_listener), 10)
+        for i, msg in enumerate(self.messages):
+            best_inferences[msg] = [(w, str(np.round(mat[i,j], digits))) for j, w in enumerate(self.states) if mat[i,j] == np.max(mat[i])]             
+        return best_inferences   
+
+    def final_listener2latex(self, digits=2):
+        mat = np.round(copy(self.final_listener), digits)
+        rows = []
+        rows.append([''] + self.states)
+        for i in range(len(self.messages)):
+            rowmax = np.max(mat[i])
+            def highlighter(x): return r"\graycell{%s}" % x if x == rowmax else str(x)
+            vals = [highlighter(x) for x in mat[i]]            
+            rows.append([self.messages[i]] + vals)
+        s = ""
+        s += "\\begin{tabular}[c]{r *{%s}{r} }\n" % len(self.states)
+        s += "\\toprule\n"
+        s += "%s\\\\\n" % " & ".join(rows[0])
+        s += "\\midrule\n"
+        for row in rows[1: ]:
+            s += "%s\\\\\n" % " & ".join(row)
+        s += "\\bottomrule\n"
+        s += "\\end{tabular}"
+        return s       
         
 if __name__ == '__main__':
 
@@ -270,7 +385,7 @@ if __name__ == '__main__':
         lexica=lexica,
         messages=['normal-message', 'abnormal-message', 'null'], # Messsages and
         costs=np.array([1.0, 2.0, 5.0]),                         # their costs.
-        meanings=['normal-world', 'abnormal-world'],             # World-types and      
+        states=['normal-world', 'abnormal-world'],               # World-types and      
         prior=np.array([2.0/3.0, 1.0/3.0]),                      # their prior.
         lexprior=np.repeat(1.0/len(lexica), len(lexica)),        # Flat lex prior.
         temperature=3.0,
@@ -287,13 +402,29 @@ if __name__ == '__main__':
     
     # Basic lexical uncertainty model:
     lulangs = mod.run_uncertainty_model(n=n, display=False)
-    mod.display_listener_matrix(lulangs[-1], title=" - Lexical uncertainty model") 
+    mod.display_listener_matrix(lulangs[-1], title=" - Lexical uncertainty model")       
 
     # The Smith et al. uncertainty/anxiety listener:
     ualangs = mod.run_anxiety_model(n=n, display=False)
     mod.display_listener_matrix(ualangs[-1], title=" - The anxiety/uncertainty model")
     
     # Lexical uncertainty with anxious experts:
-    expertlangs = mod.run_expertise_model(n=n, display=True)
+    expertlangs = mod.run_expertise_model(n=n, display=False)
     mod.display_listener_matrix(mod.listener_lexical_marginalization(expertlangs[-1]), title=" - The anxious experts model")
 
+    ##################################################
+    # Streaming lexical uncertainty model:
+    def lexicon_iterator():
+        for x in lexica:
+            yield x    
+    mod = Pragmod(
+        lexica=lexicon_iterator,
+        messages=['normal-message', 'abnormal-message', 'null'], # Messsages and
+        costs=np.array([1.0, 2.0, 5.0]),                         # their costs.
+        states=['normal-world', 'abnormal-world'],               # World-types and      
+        prior=np.array([2.0/3.0, 1.0/3.0]),                      # their prior.
+        temperature=3.0)
+    mod.stream_lexical_uncertainty(n=n)
+    mod.display_listener_matrix(mod.final_listener, title=" - Streaming lexical uncertainty model")   
+
+    
