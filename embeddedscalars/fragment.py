@@ -8,7 +8,7 @@
 
 import sys
 from itertools import product
-from settings import *
+from settings import a, b, c, s1, s2
 sys.path.append('../')
 from utils import powerset
 
