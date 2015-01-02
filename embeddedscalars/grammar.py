@@ -25,7 +25,7 @@ class UncertaintyGrammars:
         self.refinable = refinable
         self.nullmsg = nullmsg
         if self.nullmsg:
-            messages.append(("NULL", None))
+            messages.append((NULL, None))
         self.messages, self.formulae = zip(*messages)
         self.messages = list(self.messages)
         self.formulae = list(self.formulae)
