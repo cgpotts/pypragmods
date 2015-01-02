@@ -32,6 +32,8 @@ For examples of the anxious experts model in action, see `lsa2015/lsa2015.py`. I
 
 The code in `embeddedscalars` implements the compositional lexical uncertainty model of Potts et al. 2015. The core pragmatic models is in `pragmods.py`; this code creates a logical grammar (`fragment.py`), implements functions for refining that grammar (`grammar.py`), analyzes our experimental data (`experiment.py`), and reproduces all of the figures and tables in the paper (`paper.py`, making use of `analysis.py` for the comparisons between model and experiment. For examples, `paper.py` is the best place to start.
 
+The subdirectory `experiment` contains the experimental code and materials. For additional guidance on how to use these materials, see the repository for [Dan Lassiter's Submiterator](https://github.com/danlassiter/experiment-template).
+
 ## References
 
 Frank, Michael C. and Noah D. Goodman. 2012. Predicting pragmatic reasoning in language games. *Science* 336(6084): 998.
