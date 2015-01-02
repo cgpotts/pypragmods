@@ -101,7 +101,7 @@ class Experiment:
             mat.append(row)
         return mat
 
-    def pairwise_comparison_test(self, sentence, w1, w2, test=(lambda x, y : stats.ttest_ind(x, y, equal_var=True))):
+    def pairwise_comparison_test(self, sentence, w1, w2, test=stats.mannwhitneyu):
         phi = SENTENCES[sentence]
         x = None
         y = None
