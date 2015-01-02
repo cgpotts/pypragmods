@@ -119,8 +119,26 @@ def experiment_plot_and_report(
         src_filename=EXPERIMENT_SRC_FILENAME,
         output_filename=EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf')):
     exp = Experiment(src_filename=src_filename)
-    exp.experimental_report()
-    exp.plot_targets(output_filename=output_filename)
+    #exp.experimental_report()
+    #exp.plot_targets(output_filename=output_filename)
+    # Selected pairwise tests:
+    import scipy.stats
+    cmps = {'Every player hit some of his shots': [('SSS', 'SSA'),
+                                                   ('SSS', 'SAA'),
+                                                   ('SSS', ('SSA', 'SAA')),
+                                                   ('SSA', 'AAA'),
+                                                   ('SAA', 'AAA'),
+                                                   (('SSA', 'SAA'), 'AAA')],                                                   
+            'Exactly one player hit some of his shots': [('SSA', 'NSA'), ('SSA', 'SAA'),
+                                                         ('NSA', 'NNS'), ('NSA', 'NNA'),
+                                                         ('SAA', 'NNS'), ('SAA', 'NNA'),
+                                                         (('NNS','NSA'), ('AAA','NNA','NAA'))],                                                         
+            'No player hit some of his shots': list(product(('NNS', 'NSA'), ('AAA', 'NNA', 'NAA'))) + [(('NNS','NSA'), ('AAA','NNA','NAA'))]}
+    for sent, pairs in cmps.items():
+        print sent
+        for w1, w2 in pairs:
+            coef, p = exp.pairwise_comparison_test(sent, w1, w2, test=scipy.stats.mannwhitneyu)
+            print "\t%s, %s: t = %s; p = %s" % (w1, w2, np.round(coef, 2), np.round(p, 6))
 
 ######################################################################
     
@@ -197,9 +215,9 @@ def experimental_assessment(experiment_src=EXPERIMENT_SRC_FILENAME,
 
 if __name__ == '__main__':
 
-    simple_scalar_inference_example()
+    # simple_scalar_inference_example()
     # complex_example()
-    # experiment_plot_and_report()
-    # experimental_assessment()
+    experiment_plot_and_report()
+    #experimental_assessment()
 
 

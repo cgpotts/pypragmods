@@ -101,6 +101,20 @@ class Experiment:
             mat.append(row)
         return mat
 
+    def pairwise_comparison_test(self, sentence, w1, w2, test=(lambda x, y : stats.ttest_ind(x, y, equal_var=True))):
+        phi = SENTENCES[sentence]
+        x = None
+        y = None
+        if isinstance(w1, list) or isinstance(w1, tuple):
+            x = [a for w in w1 for a in self.targets[phi][w]]
+        else:
+            x = self.targets[phi][w1]            
+        if isinstance(w2, list) or isinstance(w2, tuple):
+            y = [a for w in w2 for a in self.targets[phi][w]]
+        else:
+            y = self.targets[phi][w2]
+        return test(x, y)
+
     ##################################################################
     # Experimental report
 
