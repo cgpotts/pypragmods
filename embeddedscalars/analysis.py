@@ -135,14 +135,6 @@ class Analysis:
                 ax.set_yticklabels(ytick_labels, fontsize=ytick_labelsize, color='black')
             else:
                 ax.set_yticklabels([])            
-            
-    def to_csv(self, output_filename):
-        writer = csv.writer(file(output_filename, 'w'))
-        writer.writerow(['Sentence','Condition','HumanMean','HumanLowerCI','HumanUpperCI', 'LiteralListener','RSAListener','UncertaintyListener'])
-        for i, msg in enumerate(self.messages):
-            for j, world in enumerate(self.worlds):
-                row = [msg, world, lit[i,j], lis[i,j], self.modmat[i,j], self.expmat[i,j], self.confidence_intervals[i][j][0], self.confidence_intervals[i][j][1]]
-                writer.writerow(row)
 
 ######################################################################    
     
