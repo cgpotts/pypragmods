@@ -7,6 +7,7 @@
 ######################################################################
 
 import sys
+sys.path.append('../')
 import numpy as np
 from copy import copy
 from itertools import product
@@ -14,11 +15,10 @@ from grammar import UncertaintyGrammars
 from pragmods import Pragmod
 from settings import EXPERIMENT_SRC_FILENAME
 from settings import a, b, c, s1, s2 # model-theoretic entities
-from fragment import define_lexicon, get_worlds, worldname
+from fragment import *
 from experiment import Experiment
 from analysis import Analysis
-sys.path.append('../')
-from utils import display_matrix
+from utils import *
 
 ######################################################################
 
@@ -153,6 +153,7 @@ def experimental_assessment(experiment_src=EXPERIMENT_SRC_FILENAME,
         worlds=copy(worlds),        
         refinable={'some_player': [], 'some_shot': []},
         nullmsg=nullcost)
+    
     ucmod = Pragmod(
         name="Unconstrained",
         lexica=ucgram.lexicon_iterator,
