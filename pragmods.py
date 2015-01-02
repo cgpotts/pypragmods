@@ -114,8 +114,6 @@ class Pragmod:
         lit = self.l0(lex)
         spk = self.S(lit)
         lis = self.L(spk)
-        self.final_speaker = spk
-        self.final_listener = lis
         return [lit, spk, lis]
     
     def run_uncertainty_model(self, n=2, display=True, digits=4):
