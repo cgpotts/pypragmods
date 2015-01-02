@@ -11,7 +11,7 @@ def colnorm(mat):
     """Column normalization of a matrix"""    
     return np.divide(mat, np.sum(mat, axis=0))
 
-def safelog(vals):           
+def safelog(vals):
     with np.errstate(divide='ignore'):
         return np.log(vals)
 
@@ -28,7 +28,7 @@ def display_matrix(mat, rnames=None, cnames=None, title='', digits=4):
     for i in range(mat.shape[0]):  
         print str(rnames[i]).rjust(rowlabelwidth) + "".join(str(x).rjust(cwidth) for x in mat[i, :])
 
-def powerset(x, minsize=1, maxsize=None):
+def powerset(x, minsize=0, maxsize=None):
     result = []
     if maxsize == None: maxsize = len(x)
     for i in range(minsize, maxsize+1):
@@ -38,5 +38,6 @@ def powerset(x, minsize=1, maxsize=None):
 
 def mse(x, y):
     """Mean squared error"""
-    err = np.sqrt(np.sum((x-y)**2)/len(x))
+    #err = np.sqrt(np.sum((x-y)**2)/len(x))
+    err = np.mean((x-y)**2)
     return err
