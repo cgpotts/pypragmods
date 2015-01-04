@@ -124,7 +124,7 @@ def experiment_plot_and_report(
     # Selected pairwise tests:
     cmps = {
         'Every player hit some of his shots': [('SSS', 'SSA'), ('SSS', 'SAA'), ('SSA', 'AAA'), ('SAA', 'AAA')],                                                   
-        'Exactly one player hit some of his shots': [('SSA', 'NSA'), ('SSA', 'SAA')],                                                         
+        'Exactly one player hit some of his shots': [('NSA', 'SSA'), ('SAA', 'SSA')],                                                         
         'No player hit some of his shots': list(product(('NNS', 'NSA'), ('AAA', 'NNA', 'NAA'))) + [(('NNS','NSA'), ('AAA','NNA','NAA'))]}
     for sent, pairs in cmps.items():
         print sent
