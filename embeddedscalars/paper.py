@@ -49,7 +49,7 @@ def simple_scalar_inference_example():
         print 'l0'
         display_matrix(mod.l0(lex), rnames=mod.messages, cnames=mod.states, digits=2)
         print 's1'
-        display_matrix(mod.S(lex), rnames=mod.states, cnames=mod.messages, digits=2)
+        display_matrix(mod.s1(lex), rnames=mod.states, cnames=mod.messages, digits=2)
         print 'l1'
         display_matrix(mod.L(mod.S(lex)), rnames=mod.messages, cnames=mod.states, digits=2)        
 
