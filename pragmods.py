@@ -204,7 +204,7 @@ class Pragmod:
     
     def UncertaintyListener(self): 
         """The lexical uncertainty listener reasons over the marginal of S(L0(lex)) for all lexicons lex."""
-        result = [self.lexprior[i] * self.prior * self.s1(lex).T for i, lex in enumerate(self.lexica)]
+        result = np.array([self.lexprior[i] * self.prior * self.s1(lex).T for i, lex in enumerate(self.lexica)])
         return rownorm(np.sum(result, axis=0))
 
     def UncertaintyAnxietyListener(self, marginalize=False):
