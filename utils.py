@@ -15,19 +15,36 @@ def safelog(vals):
     with np.errstate(divide='ignore'):
         return np.log(vals)
 
-def display_matrix(mat, rnames=None, cnames=None, title='', digits=4):
+def display_matrix(mat, rnames=None, cnames=None, title='', digits=4, latex=False):
     """Utility function for displaying strategies to standard output."""
-    mat = np.round(mat, digits)
     rowlabelwidth = 2 + max([len(x) for x in rnames] + [digits+2])
     cwidth = 2 + max([len(x) for x in cnames] + [digits+2])
+    s = ""
+    divider = ""
+    linebreak = "\n"
+    cmt = ""        
+    if latex:
+        divider = " & "
+        linebreak = "\\\\\n"
+        cmt = "% "
     # Divider bar of the appropriate width:
-    print "-" * ((cwidth * len(cnames)) + rowlabelwidth)
-    print title
+    s += cmt + "-" * ((cwidth * len(cnames)) + rowlabelwidth) + "\n"
+    s += cmt + title + "\n"
+    # Real table:
+    s += "\\begin{tabular}[c]{ *{%s}{r} }\n" % (len(cnames)+1)
+    s += r"\toprule" + "\n"
+    mat = np.round(mat, digits)      
     # Matrix with even-width columns wide enough for the data:
-    print ''.rjust(rowlabelwidth) + "".join([str(s).rjust(cwidth) for s in cnames])        
+    s += ''.rjust(rowlabelwidth) + divider + divider.join([str(s).rjust(cwidth) for s in cnames]) + linebreak
+    if latex:
+        s += r"\midrule" + "\n" 
     for i in range(mat.shape[0]):  
-        print str(rnames[i]).rjust(rowlabelwidth) + "".join(str(x).rjust(cwidth) for x in mat[i, :])
-
+        s += str(rnames[i]).rjust(rowlabelwidth) + divider + divider.join(str(x).rjust(cwidth) for x in mat[i, :]) + linebreak
+    if latex:
+        s += r"\bottomrule" + "\n"
+        s += r"\end{tabular}"
+    print s
+        
 def powerset(x, minsize=0, maxsize=None):
     result = []
     if maxsize == None: maxsize = len(x)
