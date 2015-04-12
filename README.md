@@ -24,9 +24,9 @@ mod.run_anxiety_model()
 mod.run_expertise_model()
 ```
 
-## LSA 2015 code
+## The disjunction code
 
-For examples of the anxious experts model in action, see `lsa2015/lsa2015.py`. It includes the code for the illustrative examples in Levy and Potts 2015 (reference below). In particular, the function `compositional_disjunction` shows how to use `lexica.py` to create a space of lexica for analysis with `pragmod.py`.
+For examples of the anxious experts model in action, see `disjunction/bls41.py`. It includes the code for the illustrative examples in Levy and Potts 2015 and Potts and Levy (reference below). In particular, the function `compositional_disjunction` shows how to use `lexica.py` to create a space of lexica for analysis with `pragmod.py`.
 
 ## Embedded scalars code
 
@@ -43,6 +43,8 @@ Frank, Michael C. and Noah D. Goodman. 2012. [Predicting pragmatic reasoning in 
 Levy, Roger and Christopher Potts. 2015. [Negotiating lexical uncertainty and expertise with disjunction](http://web.stanford.edu/~cgpotts/talks/levy-potts-pragdisj-poster.pdf). Poster presented at the 89th Meeting of the Linguistic Society of America, Portland, OR, January 8&ndash;11.
 
 Potts, Christopher; Daniel Lassiter; Roger Levy; Michael C. Frank. 2015. [Embedded implicatures as pragmatic inferences under compositional lexical uncertainty](http://web.stanford.edu/~cgpotts/papers/embedded-scalars.pdf). Ms., Stanford and UCSD.
+
+Potts, Christopher and Roger Levy. 2015. Negotiating lexical uncertainty and speaker expertise with disjunction. To appear in *Proceedings of the 41st Annual Meeting of the Berkeley Linguistics Society*.
 
 Smith, Nathaniel J.; Noah D. Goodman; and Michael C. Frank. 2013. [Learning and using language via recursive pragmatic reasoning about other agents](http://papers.nips.cc/paper/4929-learning-and-using-language-via-recursive-pragmatic-reasoning-about-other-agents). In *Advances in Neural Information Processing Systems* 26, 3039&ndash;3047.
 
