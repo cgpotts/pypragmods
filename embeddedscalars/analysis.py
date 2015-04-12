@@ -19,7 +19,7 @@ from utils import *
 ######################################################################
 
 class Analysis:
-    def __init__(self, experiment=None, models=None):
+    def __init__(self, experiment=None, models=None, rescaler=1.0):
         self.experiment = experiment
         self.models = models
         self.messages = copy(self.models[0].messages)
@@ -33,10 +33,11 @@ class Analysis:
             for i, lis in enumerate(self.listeners):
                 self.listeners[i] = lis[: -1]
         self.expmat = np.array(self.experiment.target_means2matrix(self.messages, self.worlds))
-        self.rescale_experiment()        
+        self.rescaler = rescaler
+        self.rescale_experiment()
 
     def rescale_experiment(self):
-        self.expmat = rownorm(self.expmat-1.0)
+        self.expmat = rownorm(self.expmat-self.rescaler)
         
     def overall_analysis(self, digits=4):
         expvec = self.expmat.flatten()
@@ -48,7 +49,19 @@ class Analysis:
             err = mse(expvec, lisvec)            
             rows.append(np.array([pearson, pearson_p, spearman, spearman_p, err]))        
         display_matrix(np.array(rows), rnames=self.modnames, cnames=['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'], digits=digits)
-	
+
+    def numeric_analysis(self):
+        results = {}
+        expvec = self.expmat.flatten()
+        labels = ['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE']
+        for i, lis in enumerate(self.listeners):
+            lisvec = lis.flatten()
+            pearson, pearson_p = pearsonr(expvec, lisvec)
+            spearman, spearman_p = spearmanr(expvec, lisvec)
+            err = mse(expvec, lisvec)
+            results[self.modnames[i]] = dict(zip(labels, [pearson, pearson_p, spearman, spearman_p, err]))
+        return results
+    	
     def analysis_by_message(self, digits=4):
         rows = []
         msglen = max([len(x) for x in self.messages])
@@ -64,33 +77,36 @@ class Analysis:
                 rows.append(np.array([pearson, pearson_p, spearman, spearman_p, err]))        
         display_matrix(np.array(rows), rnames=rnames, cnames=['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'], digits=digits)
 
-    def comparison_plot(self, width=0.2, output_filename=None):
+    def comparison_plot(self, width=0.2, output_filename=None, nrows=None):
         # Preferred: human left, then models from best to worse, informally:
         listeners = copy(self.listeners)[::-1]
         modnames = copy(self.modnames)[::-1]
-        # Plot dimensions:              
-        nrows = len(self.messages)
+        # Plot dimensions:
+        if nrows == None:         
+            nrows = len(self.messages)
         ncols = len(self.listeners)+1
         # Basic set-up:
         fig, axarray = plt.subplots(nrows=nrows, ncols=ncols)
         fig.set_figheight(nrows*4)
         fig.set_figwidth(ncols*4)
         fig.subplots_adjust(wspace=0.1, hspace=0.1)
-        fig.text(0.5, 0.08, 'Probability', ha='center', va='center', fontsize=30)
+        fig.text(0.5, 0.05, 'Probability', ha='center', va='center', fontsize=30)
         fig.text(0.08, 0.5, 'World', ha='center', va='center', rotation='vertical', fontsize=30)
         # Human column, then model columns:
-        self.model_comparison_plot(axarray[:,0], self.expmat, width=width, color=colors[0], modname='Human', left=True, right=False)
+        self.model_comparison_plot(axarray[:,0], self.expmat, width=width, color=colors[0], modname='Human', left=True, right=False, nrows=nrows)
         for i, lis in enumerate(listeners):
-            self.model_comparison_plot(axarray[: , i+1], lis, width=width, color=colors[-(i+1)], modname=modnames[i], left=False, right=i==ncols-2)
+            self.model_comparison_plot(axarray[: , i+1], lis, width=width, color=colors[-(i+1)], modname=modnames[i], left=False, right=i==ncols-2, nrows=nrows)
         # Output:
         if output_filename:
             plt.savefig(output_filename, bbox_inches='tight')
         else:
             plt.show()
 
-    def model_comparison_plot(self, axarray, modmat, width=1.0, color='black', modname=None, left=False, right=False):
+    def model_comparison_plot(self, axarray, modmat, width=1.0, color='black', modname=None, left=False, right=False, nrows=None):
         # Preferred ordering puts the embedded 'some' sentences last:
         message_ordering_indices = [0,3,6,1,4,7,2,5,8]
+        if nrows:
+            message_ordering_indices = message_ordering_indices[-nrows:]
         msgs = [self.messages[i] for i in message_ordering_indices]
         titles = [TITLES[msg] for msg in msgs]
         titles = [r"\textbf{\emph{%s}}" % t for t in titles]

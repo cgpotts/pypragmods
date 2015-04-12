@@ -1,0 +1,107 @@
+<html>
+<meta charset="UTF-8">
+<head>
+
+<title>Basketball</title>
+<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="mmturkey.0.5.js"></script> 
+<link rel="stylesheet" href="bball-experiment-binary.css"/>
+</head>
+<body>
+
+<div class="slide" id="instructions">
+<br><br>
+<p class="block-text">Help us train an automated sportscasting system by making judgments about comments on a basketball competition. Fun and should take around 5 - 7 minutes.</p>
+  
+<button type="button" onclick="experiment.intro()">Start</button>
+<p class="block-text" id="mustaccept">
+You must accept the HIT in order to continue.
+</p>
+  
+	<p class="block-text" id="legal">Legal information: By answering the following questions, you are participating in a study being performed by researchers at Stanford University. If you have questions about this research, please contact Dan Lassiter at <a
+		href="mailto://danlassiter@stanford.edu">danlassiter@stanford.edu</a>. You must be  at least 18 years old to participate. Your participation in this research is voluntary. You may
+		decline to answer any or all of the following questions. You may decline further participation, at any time, without adverse consequences. Your anonymity is assured; the researchers who have requested your participation will not receive any personal information about you.</p> <BR><BR>
+</div>
+
+<div class="slide" id="intro">
+<p class="block-text blurb">We are trying to train an automated sportscasting system to generate color commentary on simple competitions. We'd like you to make judgments about the comments it generates. We'll use these ratings to train our system further.</p>
+
+<p class="block-text blurb">On each page, we will show you the outcome from a basketball free-throw shooting competition between 3 players, labeled A B and C for convenience. We'll give you a comment the system has generated, and your job is to decide whether a comment is true or false.</p>
+<button type="button" id="introbutton">Begin practice</button>
+</div>
+
+<div class="slide" id="training0">
+<p class='block-text'>We're going to do some practice now.</p>
+</div>
+
+<div class="slide" id="training4">
+<p class='block-text'>OK, let's get started for real now!</p>
+</div>
+
+<div class="slide" id="stage">
+
+<div class="progress">
+<span>Progress:</span>
+<div class="bar-wrapper">
+<div class="bar"></div>
+</div>
+</div>
+
+<p id="toptext"></p>
+	<br>
+
+<table border="0">
+<tr>
+<td id='playerAname'><u>Player A</u></td>
+<td id='playerBname'><u>Player B</u></td>
+<td id='playerCname'><u>Player C</u></td>
+</tr>
+<tr>
+<span id="images">{{}}</span>
+</tr>
+</table>
+
+<div id='response'>
+<br>
+<p class="txt" id="questiontxt">{{}}</p>
+<br>
+<div id='appratingdiv'>
+<table id='ratingtable'>   
+<tr>
+<td>False &nbsp; &nbsp;</td>
+<td>
+<form id="apprating">
+<input class='rating' name='rating' type='radio' id='v1' value='FALSE' />
+<input class='rating' name='rating' type='radio' id='v7' value='TRUE' />
+</form>
+</td>
+<td> 
+&nbsp; &nbsp; True
+</td>
+</tr>
+</table>
+</div>
+
+<p id='error'>Please answer the question before continuing.</p>
+<p id='feedback'>{{}}</p>	
+
+<button id="continue">Continue</button>
+</div>
+</div>
+
+<div class="slide" id="demographic">
+<p>Last question: what is your native language (the language that was spoken at home when you were a child)?</p>
+<p>Please enter it below, and then click 'Submit'.</p> 
+<form id="lgform">
+<input type="text" name="lg" id="lgbox"></input>
+<button type="button" id="lgsubmit">Submit</button>
+</form>
+</div>
+
+<div class="slide" id="finished">
+You're finished - thanks for participating! Submitting to Mechanical Turk...
+</div>
+
+<script type="text/javascript" src="bball-experiment-binary.js"></script>
+</body>
+</html>

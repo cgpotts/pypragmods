@@ -1,0 +1,173 @@
+body {
+	padding: 0;
+	margin: 0;
+	font-family: Palatino Linotype, Bookman Antiqua, Palatino, serif;
+	font-size: 16px;
+	line-height: 20px;
+	text-align: center;
+	width: 95%;
+	height: 95%;
+}
+
+.slide {
+	width: 95%;
+	height: 95%;
+	display: none;
+	position: absolute;
+	margin: 0;
+	margin-left: 0.5%;
+	padding: 1% 2% 1% 2%;
+}
+
+input, select, button {font-family: Georgia, serif; font-size: 14px;}
+
+button {
+	background: url(button-gradient.png);
+	border: 1px solid #999;
+	border-top: 1px solid #e0e0e0;
+	border-left: 1px solid #e0e0e0;
+	margin: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+	height: 29px;
+	min-width: 70px;
+}
+button:active {
+	border-left: 1px solid #c9c9c9;
+	border-top: 1px solid #c9c9c9;
+	background: none;
+	background-color: #c9c9c9;
+}
+
+button[disabled] {
+	background: url(zen-button.png);
+	border: 1px solid #999;
+	border-top: 1px solid #e0e0e0;
+	border-left: 1px solid #e0e0e0;
+	cursor: not-allowed;
+}
+
+#instructions {
+  text-align: center;
+}
+
+.block-text {
+  width: 500px;
+  text-align: justify;
+  margin: 0 auto;
+  margin-bottom: 1em;
+  font-size: 17px;
+}
+
+#legal {
+  margin: 0 auto;
+  margin-top: 1.5em;
+  font-size: 0.8em;
+}
+
+#qtxt {
+  font-size: 25px;
+  font-family: Arial, sans-serif;
+  margin: 0 auto;
+  text-align: center;
+  width: 50px;
+}
+
+.txt {
+    text-align: center;
+    font-size: 25px;
+}
+
+.progress{
+    position:absolute;
+	top:5px;
+	left:615px;
+}
+
+.progress span{
+    position:relative;
+    top: -6px;
+}
+
+.bar-wrapper{
+    height:20px;
+    width:200px;
+    border:1px solid #000000;
+    display:inline-block;
+}
+
+.bar{
+    position:relative;
+    height:100%;
+    width:0px;
+    background-color:#000000
+}
+
+.player {
+	position:absolute;
+	top:100;
+	z-index:0;
+	height:175;
+	width:250;
+}
+
+.balls {
+	position:absolute;
+	top:150;
+	z-index:1;
+	height:175;
+	width:250;
+}
+
+.imgs1 {
+	left:50;
+}
+
+.imgs2 {
+	left:350;
+}
+
+.imgs3 {
+	left:650;
+}
+
+#response {
+    text-align:center;
+    position:absolute;
+    top:350px;
+    width: 800px;
+    padding-left: 30px;
+}
+
+#ratingtable {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#playerAname { /* left = player 1 image location plus just under half of image width */
+	text-align:center;
+	position:absolute;
+	top:80px;
+	left:145px;
+}
+
+#playerBname { /* etc. */
+	text-align:center;
+	position:absolute;
+	top:80px;
+	left:445px;
+}
+
+#playerCname {
+	text-align:center;
+	position:absolute;
+	top:80px;
+	left:745px;
+}
+
+#toptext {
+	font-size:17px;
+	position:absolute;
+	top:10px;
+	left:390px;
+}

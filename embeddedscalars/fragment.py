@@ -25,7 +25,7 @@ def define_lexicon(player=[], shot=[], worlds=[]):
         "no":          [[X, Y] for X, Y in product(D_et, repeat=2) if len(set(X) & set(Y)) == 0],
         "PlayerA":     [X for X in powerset(player) if a in X],
         "PlayerB":     [X for X in powerset(player) if b in X],
-        "PlayerC":     [X for X in powerset(player) if c in X],
+        "PlayerC":     [X for X in powerset(player) if c in X],        
         # Tempting to intensionalize these, but that means using intensional quantifiers,
         # which are intractable on this set-theoretic formulation. Our goal is to understand
         # refinement and lexical uncertainty, which we can study using verbs and extensional
@@ -55,7 +55,12 @@ def define_lexicon(player=[], shot=[], worlds=[]):
         "scored_not_aced":    [[w, x] for w, x in product(worlds, player) if len(shot[: w[player.index(x)]]) == 1],
         "only_PlayerA":       [X for X in powerset(player) if a in X and len(X) == 1],
         "only_PlayerB":       [X for X in powerset(player) if b in X and len(X) == 1],
-        "only_PlayerC":       [X for X in powerset(player) if c in X and len(X) == 1]                
+        "only_PlayerC":       [X for X in powerset(player) if c in X and len(X) == 1],
+        # For disjunctive examples (limited compositionality to keep the examples tractable):
+        "hit_shot1":           [[w, x] for w, x in product(worlds, player) if w[player.index(x)] in (1, 3)],
+        "hit_shot2":           [[w, x] for w, x in product(worlds, player) if w[player.index(x)] in (2, 3)],
+        "hit_shot1_or_shot2":  [[w, x] for w, x in product(worlds, player) if w[player.index(x)] != 0],
+        "hit_shot1_and_shot2": [[w, x] for w, x in product(worlds, player) if w[player.index(x)] == 3]        
         }
     return lex
 
@@ -76,6 +81,11 @@ def tv(V, Q, worlds, subjects):
     I don't see how to avoid it."""    
     return [[w,x] for w, x in product(worlds, subjects) if [y for w_prime, x_prime, y in V if w_prime == w and x_prime == x] in Q]
 
+def coord(f, X, Y):
+    for x, y, z in f:
+        if x==X and y==Y:
+            return z
+    return []
     
 ######################################################################
 

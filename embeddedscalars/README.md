@@ -19,9 +19,13 @@ Potts, Christopher; Daniel Lassiter; Roger Levy; Michael C. Frank. 2015. [Embedd
 
 * `experiment.py`: utilities for processing and studying the experimental data
 * `analysis.py`: model assessment against the experimental data
-* `embeddedscalars-experiment-results.csv`: the experimental data
-* `experiment/`: JQuery-based experiment materials and code
+* `embeddedscalars-experiment-results-binary.csv`: the experimental data from the binary version of the experiment
+* `embeddedscalars-experiment-results-likert.csv`: the experimental data from the Likert-scale version of the experiment
+* `embeddedscalars-paramexplore-binary.csv`: the results of the parameter exploration suggested by a reviewer (appendix A of the paper)
+* `embeddedscalars-paramexplore-likert.csv`: corresponding parameter exploration for the Likert-scale experiment (not report in the paper)
+* `experiment/`: JQuery-based experiment materials and code for both versions of the experiment
 * `bootstrap.py`: version 0.3.2 of scikits.bootstrap (included here to ensure reproducibility)
 
+In the two experiment files, the workerid values have been anonymized, but in a way that preserves identities across the two files. (31 people took both experiments, which were conducted about a year apart.)
 
 

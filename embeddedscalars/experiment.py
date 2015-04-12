@@ -19,7 +19,7 @@ from settings import *
 # Clas for modeling experimental items (rows in the table):
 
 class Item:
-    def __init__(self, data):
+    def __init__(self, data, response_transformation=(lambda x : int(x))):
         # Attributes for embeddedscalars-experiment-results.csv:
         #
         # workerid,
@@ -37,7 +37,9 @@ class Item:
         self.data = data
         for key, val in self.data.items():
             key = key.replace(".", "_")
-            if key in ('trialnum', 'response', 'rt'):
+            if key in ('response',):
+                val = response_transformation(val)
+            elif key in ('trialnum', 'rt'):
                 val = int(val)
             elif key == 'trainingCorrect' and val == 'NA':
                 val = None
@@ -53,9 +55,10 @@ class Item:
 # Class for the entire experiment, built from the spreadsheet:
     
 class Experiment:
-    def __init__(self, src_filename=EXPERIMENT_SRC_FILENAME):        
+    def __init__(self, src_filename=EXPERIMENT_SRC_FILENAME, response_transformation=(lambda x : int(x))):       
         self.src_filename = src_filename
-        self.data = [Item(d) for d in csv.DictReader(file(src_filename))]
+        self.response_transformation = response_transformation
+        self.data = [Item(d, response_transformation=response_transformation) for d in csv.DictReader(file(src_filename))]
         self.targets = defaultdict(lambda : defaultdict(list))
         self.get_target_responses()
 
@@ -173,16 +176,13 @@ class Experiment:
         ax2.set_ylabel('Count')
         plt.show()
                 
-    def plot_targets(self, output_filename=None, all_x_labels=False):
+    def plot_targets(self, output_filename=None, all_x_labels=False, xlim=[0.0, 8.0], xticks=range(1,8), xlabel="Human responses"):
         rnames = sorted(self.targets.keys())
         mat = self.target_means2matrix(rnames, CONDITIONS)
         confidence_intervals = self.target_cis2matrix(rnames, CONDITIONS)                        
         # Orientation:
         barwidth = 1.0
         pos = np.arange(0.0, len(CONDITIONS)*barwidth, barwidth)
-        xlim = [0,8]
-        xticks = range(1,8)
-        xlabel = "Human responses"
         ylim = [0.0, len(CONDITIONS)*barwidth]
         yticks = pos+(barwidth/2.0)
         yticklabels = [r'\texttt{%s}' % s for s in CONDITIONS[::-1]] # Reversal for preferred condition order.
@@ -202,7 +202,7 @@ class Experiment:
         fig.set_figheight(axis_height*nrows)
         fig.set_figwidth(axis_width*ncols)
         fig.subplots_adjust(wspace=0.3)
-        fig.text(0.5, 0.05, 'Mean human response', ha='center', va='center', fontsize=labsize)
+        fig.text(0.5, 0.05, xlabel, ha='center', va='center', fontsize=labsize)
         fig.text(0.05, 0.5, 'World', ha='center', va='center', rotation='vertical', fontsize=labsize)
         # Axes:
         indices = list(product(range(nrows), range(ncols)))    
