@@ -31,8 +31,9 @@ def display_matrix(mat, rnames=None, cnames=None, title='', digits=4, latex=Fals
     s += cmt + "-" * ((cwidth * len(cnames)) + rowlabelwidth) + "\n"
     s += cmt + title + "\n"
     # Real table:
-    s += "\\begin{tabular}[c]{ *{%s}{r} }\n" % (len(cnames)+1)
-    s += r"\toprule" + "\n"
+    if latex:
+        s += "\\begin{tabular}[c]{ *{%s}{r} }\n" % (len(cnames)+1)
+        s += r"\toprule" + "\n"
     mat = np.round(mat, digits)      
     # Matrix with even-width columns wide enough for the data:
     s += ''.rjust(rowlabelwidth) + divider + divider.join([str(s).rjust(cwidth) for s in cnames]) + linebreak
