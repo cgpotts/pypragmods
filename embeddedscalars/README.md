@@ -25,6 +25,7 @@ Potts, Christopher; Daniel Lassiter; Roger Levy; Michael C. Frank. 2015. [Embedd
 * `embeddedscalars-paramexplore-likert.csv`: corresponding parameter exploration for the Likert-scale experiment (not report in the paper)
 * `experiment/`: JQuery-based experiment materials and code for both versions of the experiment
 * `bootstrap.py`: version 0.3.2 of scikits.bootstrap (included here to ensure reproducibility)
+* `embimp.mplstyle`: some matplotlib styling specs
 
 In the two experiment files, the workerid values have been anonymized, but in a way that preserves identities across the two files. (31 people took both experiments, which were conducted about a year apart.)
 
