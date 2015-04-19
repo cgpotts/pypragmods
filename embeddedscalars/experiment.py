@@ -55,7 +55,7 @@ class Item:
 # Class for the entire experiment, built from the spreadsheet:
     
 class Experiment:
-    def __init__(self, src_filename=EXPERIMENT_SRC_FILENAME, response_transformation=(lambda x : int(x))):       
+    def __init__(self, src_filename=BINARY_EXPERIMENT_SRC_FILENAME, response_transformation=(lambda x : int(x))):       
         self.src_filename = src_filename
         self.response_transformation = response_transformation
         self.data = [Item(d, response_transformation=response_transformation) for d in csv.DictReader(file(src_filename))]
@@ -241,7 +241,7 @@ class Experiment:
     
 if __name__ == '__main__':
 
-    exp = Experiment(src_filename=EXPERIMENT_SRC_FILENAME)
+    exp = Experiment(src_filename=BINARY_EXPERIMENT_SRC_FILENAME)
     #exp.plot_targets(output_filename=EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf'))
     exp.experimental_report()
 

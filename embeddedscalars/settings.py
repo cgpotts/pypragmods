@@ -7,7 +7,8 @@
 import matplotlib.pyplot as plt
 import matplotlib
 
-EXPERIMENT_SRC_FILENAME = 'embeddedscalars-experiment-results.csv'
+LIKERT_EXPERIMENT_SRC_FILENAME = 'embeddedscalars-experiment-results-likert.csv'
+BINARY_EXPERIMENT_SRC_FILENAME = 'embeddedscalars-experiment-results-binary.csv'
 
 ######################################################################
 # Model-theoretic entities:
@@ -18,7 +19,7 @@ s1 = 's1' ; s2 = 's2'
 ######################################################################
 # Plot set-up
 
-plt.style.use('ggplot')
+plt.style.use('embimp.mplstyle')
 matplotlib.rc('text', usetex=True)
 matplotlib.rc('font', family='serif', serif='times')
 matplotlib.rcParams['text.latex.preamble'] = [r"\usepackage{amsmath}", r'\boldmath']

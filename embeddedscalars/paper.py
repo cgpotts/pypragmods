@@ -16,7 +16,7 @@ from collections import defaultdict
 from operator import itemgetter
 from grammar import UncertaintyGrammars
 from pragmods import Pragmod
-from settings import EXPERIMENT_SRC_FILENAME
+from settings import BINARY_EXPERIMENT_SRC_FILENAME, LIKERT_EXPERIMENT_SRC_FILENAME
 from settings import a, b, c, s1, s2 # model-theoretic entities
 from fragment import *
 from experiment import Experiment
@@ -24,6 +24,7 @@ from analysis import Analysis
 from utils import *
 
 ######################################################################
+# Figure 2
 
 def simple_scalar_inference_example():
 
@@ -57,8 +58,71 @@ def simple_scalar_inference_example():
         display_matrix(mod.L(mod.S(lex)), rnames=mod.messages, cnames=mod.states, digits=2)        
 
     display_matrix(mod.final_listener,  rnames=mod.messages, cnames=mod.states, digits=2)
-            
+
 ######################################################################
+# Table 2: Nested scalar terms (from Sauerland's work):
+
+def scalar_disjunction_example(refinable={}):
+    players = [a]
+    shots = ['1', '2', 'f']
+    regular_shots = ['1', '2']    
+    worlds = [("-",), ('f',), ('1',), ('2',), ('f1',), ('f2',), ('12',), ('f12',)]    
+    lexicon = {
+        "player": players,
+        "PlayerA":  [[a]],
+        "shot1": [['1']],
+        "shot2": [['2']],
+        "the_freethrow": [X for X in powerset(shots) if 'f' in X],
+        "hit":    [[w, x, y] for w, x, y in product(worlds, players, shots) if y in set(w[players.index(x)])],
+        "some_shot": [Y for Y in powerset(shots) if len(set(regular_shots) & set(Y)) > 0],
+        "only_some_shot": [Y for Y in powerset(shots) if len(set(regular_shots) & set(Y)) == 1],
+        "every_shot": [Y for Y in powerset(shots) if set(regular_shots) <= set(Y)],
+        "not_every_shot": [Y for Y in powerset(set(shots)) if not(set(regular_shots) <= set(Y))],
+        "AND": [[X, Y, [z for z in X if z in Y]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)],
+        "OR": [[X, Y, [z for z in X]+[z for z in Y if z not in X]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)],
+        "XOR": [[X, Y, [z for z in X if z not in Y]+[z for z in Y if z not in X]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)]}
+
+    # Import the new lexicon into the namespace:
+    for word, sem in lexicon.items():
+        setattr(sys.modules[__name__], word, sem)
+    new_worldnames = (lambda x : "".join(map(str,x)))
+    worldnames = [new_worldnames(w) for w in worlds]
+
+    # Messages:
+    messages = [
+        ("PlayerA hit the freethrow", "iv(PlayerA, tv(hit, the_freethrow, self.worlds, player))"),
+        ("PlayerA hit every shot", "iv(PlayerA, tv(hit, every_shot, self.worlds, player))"),
+        ("PlayerA hit some shot", "iv(PlayerA, tv(hit, some_shot, self.worlds, player))"),
+        ("PlayerA hit some shot or the freethrow", "iv(PlayerA, tv(hit, coord(OR, some_shot, the_freethrow), self.worlds, player))"),
+        ("PlayerA hit some shot and the freethrow", "iv(PlayerA, tv(hit, coord(AND, some_shot, the_freethrow), self.worlds, player))"),
+        ("PlayerA hit every shot or the freethrow", "iv(PlayerA, tv(hit, coord(OR, every_shot, the_freethrow), self.worlds, player))"),
+        ("PlayerA hit every shot and freethrow", "iv(PlayerA, tv(hit, coord(AND, every_shot, the_freethrow), self.worlds, player))")]
+    temperature = 1.0
+    nullmsg = True
+    nullcost = 5.0
+
+    # Refinement model:
+    gram = UncertaintyGrammars(
+        baselexicon=copy(lexicon),
+        messages=copy(messages),
+        worlds=copy(worlds),        
+        refinable=refinable,
+        nullmsg=nullcost)
+    mod = Pragmod(
+        lexica=gram.lexicon_iterator,
+        baselexicon=gram.baselexicon_mat,
+        messages=gram.messages,
+        states=worldnames,
+        temperature=temperature,
+        nullmsg=nullmsg,
+        nullcost=nullcost)
+
+    # Model run:
+    mod.stream_lexical_uncertainty(n=0)
+    display_matrix(mod.final_listener,  rnames=mod.messages, cnames=mod.states, digits=2, latex=True)
+    
+######################################################################
+# Tables 3 and 4
 
 def complex_example():
     # General settings:
@@ -93,6 +157,7 @@ def complex_example():
         temperature=temperature,
         nullmsg=nullmsg,
         nullcost=nullcost)
+    
     # Run and report:
     neomod.stream_lexical_uncertainty(n=0)
     neomod.listener_report(digits=2)
@@ -112,6 +177,7 @@ def complex_example():
         temperature=temperature,
         nullmsg=nullmsg,
         nullcost=nullcost)
+
     # Run and report:
     ucmod.stream_lexical_uncertainty(n=0)
     ucmod.listener_report(digits=2)  
@@ -154,67 +220,28 @@ def embedded_disjunction_example(refinable={}):
         nullcost=nullcost)
     mod.stream_lexical_uncertainty(n=0)
     display_matrix(mod.final_listener,  rnames=mod.messages, cnames=mod.states, digits=2, latex=True)
-
+           
 ######################################################################
-# Nested scalar terms (from Sauerland's work):
-
-def scalar_disjunction_example(refinable={}):
-    players = [a]
-    shots = ['1', '2', 'f']
-    regular_shots = ['1', '2']    
-    worlds = [("",), ('f',), ('1',), ('2',), ('f1',), ('f2',), ('12',), ('f12',)]    
-    lexicon = {
-        "player": players,
-        "PlayerA":  [[a]],
-        "the_freethrow": [X for X in powerset(shots) if 'f' in X],
-        "hit":    [[w, x, y] for w, x, y in product(worlds, players, shots) if y in set(w[players.index(x)])],
-        "some_shot": [Y for Y in powerset(shots) if len(set(regular_shots) & set(Y)) > 0],
-        "only_some_shot": [Y for Y in powerset(shots) if len(set(regular_shots) & set(Y)) == 1],
-        "every_shot": [Y for Y in powerset(shots) if set(regular_shots) <= set(Y)],
-        "not_every_shot": [Y for Y in powerset(set(shots)) if not(set(regular_shots) <= set(Y))],
-        "AND": [[X, Y, [z for z in X if z in Y]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)],
-        "OR": [[X, Y, [z for z in X]+[z for z in Y if z not in X]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)],
-        "XOR": [[X, Y, [z for z in X if z not in Y]+[z for z in Y if z not in X]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)]}
-    # Import the new lexicon into the namespace:
-    for word, sem in lexicon.items():
-        setattr(sys.modules[__name__], word, sem)
-    new_worldnames = (lambda x : "".join(map(str,x)))
-    worldnames = [new_worldnames(w) for w in worlds]
-    # Messages:
-    messages = [
-        ("PlayerA hit the freethrow", "iv(PlayerA, tv(hit, the_freethrow, self.worlds, player))"),
-        ("PlayerA hit some shot", "iv(PlayerA, tv(hit, some_shot, self.worlds, player))"),
-        ("PlayerA hit some shot or the freethrow", "iv(PlayerA, tv(hit, coord(OR, some_shot, the_freethrow), self.worlds, player))"),
-        ("PlayerA hit some shot and the freethrow", "iv(PlayerA, tv(hit, coord(AND, some_shot, the_freethrow), self.worlds, player))"),
-        ("PlayerA hit every shot or the freethrow", "iv(PlayerA, tv(hit, coord(OR, every_shot, the_freethrow), self.worlds, player))"),
-        ("PlayerA hit every shot ad freethrow", "iv(PlayerA, tv(hit, coord(AND, every_shot, the_freethrow), self.worlds, player))")]
-    temperature = 1.0
-    nullmsg = True
-    nullcost = 5.0
-    # Refinement model:
-    gram = UncertaintyGrammars(
-        baselexicon=copy(lexicon),
-        messages=copy(messages),
-        worlds=copy(worlds),        
-        refinable=refinable,
-        nullmsg=nullcost)
-    mod = Pragmod(
-        lexica=gram.lexicon_iterator,
-        baselexicon=gram.baselexicon_mat,
-        messages=gram.messages,
-        states=worldnames,
-        temperature=temperature,
-        nullmsg=nullmsg,
-        nullcost=nullcost)
-    mod.stream_lexical_uncertainty(n=0)
-    display_matrix(mod.final_listener,  rnames=mod.messages, cnames=mod.states, digits=2, latex=True)
+# Figure 4 and figure 7
+            
+def experiment_plot_and_report_binary():    
+    experiment_plot_and_report(        
+        src_filename=BINARY_EXPERIMENT_SRC_FILENAME,
+        output_filename=BINARY_EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf'),
+        response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
+        plot_keywordargs={'xlim':[0.0,1.0], 'xlabel':'Percentage True responses', 'xticks':np.arange(0.2, 1.2, .2)})
     
-######################################################################
+def experiment_plot_and_report_likert():    
+    experiment_plot_and_report(        
+        src_filename=LIKERT_EXPERIMENT_SRC_FILENAME,
+        output_filename=LIKERT_EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf'),
+        response_transformation=(lambda x : int(x)),
+        plot_keywordargs={'xlabel':'Mean Likert response'})
 
 def experiment_plot_and_report(
-        src_filename=EXPERIMENT_SRC_FILENAME,
-        output_filename=EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf'),
-        response_transformation=(lambda x : int(x)),
+        src_filename=None,
+        output_filename=None,
+        response_transformation=None,
         plot_keywordargs={}):
     exp = Experiment(src_filename=src_filename, response_transformation=response_transformation)
     exp.experimental_report()
@@ -229,26 +256,49 @@ def experiment_plot_and_report(
         for w1, w2 in pairs:            
             coef, p = exp.pairwise_comparison_test(sent, w1, w2)
             print "\t%s, %s: W = %s; p = %s" % (w1, w2, np.round(coef, 2), np.round(p, 4))
-
-def experiment_plot_and_report_binary():    
-    experiment_plot_and_report(        
-        src_filename="basketball-binary-version-pilot-4-1-15-results-parsed.csv",
-        output_filename="basketball-binary-version-pilot-4-1-15-results-parsed.pdf",
-        response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
-        plot_keywordargs={'xlim':[0.0,1.0], 'xlabel':'Percentage True responses', 'xticks':np.arange(0.2, 1.2, .2)})
                                                     
 ######################################################################
-    
-def experimental_assessment(experiment_src=EXPERIMENT_SRC_FILENAME,
-                            plot_output_filename='allmodels.pdf',
-                            response_transformation=(lambda x : int(x)),
-                            rescaler=1.0,
+# Assessment
+
+# Figure 5 and tables 5 and 6
+def experimental_assessment_binary():
+    experimental_assessment(
+        experiment_src=BINARY_EXPERIMENT_SRC_FILENAME,
+        plot_output_filename="allmodels-binary.pdf",
+        response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
+        rescaler=0.0)
+
+# Table 8 (but does much more if run):
+def experimental_assessment_likert():
+    experimental_assessment(
+        experiment_src=LIKERT_EXPERIMENT_SRC_FILENAME,
+        plot_output_filename="allmodels-likert.pdf",
+        response_transformation=(lambda x : int(x)),
+        rescaler=1.0)
+
+# Figure 6
+def experimental_assessment_binary_critical_optimal_params():
+    experimental_assessment(
+        experiment_src=BINARY_EXPERIMENT_SRC_FILENAME,
+        plot_output_filename='allmodels-paramexplore-binary.pdf',
+        response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
+        rescaler=0.0,
+        uctemp=0.1,
+        ucnullcost=1.0,
+        ngtemp=0.1,
+        ngnullcost=1.0,
+        nrows=3)        
+
+# General function for the above:
+def experimental_assessment(experiment_src=None,
+                            plot_output_filename=None,
+                            response_transformation=None,
+                            rescaler=None,
                             uctemp=1.0,
                             ucnullcost=5.0,
                             ngtemp=1.0,
                             ngnullcost=5.0,
-                            nrows=None):
-                            
+                            nrows=None):                            
     # General settings:
     subjs= ('every_player', 'exactly_one_player', 'no_player')
     objs = ('every_shot', 'no_shot', 'some_shot')
@@ -312,22 +362,32 @@ def experimental_assessment(experiment_src=EXPERIMENT_SRC_FILENAME,
     analysis.overall_analysis()
     analysis.analysis_by_message()
     analysis.comparison_plot(output_filename=plot_output_filename, nrows=nrows)
-
-def experimental_assessment_binary():
-    experimental_assessment(
-        experiment_src="basketball-binary-version-pilot-4-1-15-results-parsed.csv",
-        plot_output_filename="allmodels-binary.pdf",
-        response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
-        rescaler=0.0)
     
 ######################################################################
+# Table 7
 # Grid search over parameter space in response to a reviewer request.
 
-def parameter_exploration(
-        experiment_src=EXPERIMENT_SRC_FILENAME,
+def parameter_exploration_binary():
+    parameter_exploration(
+        experiment_src=BINARY_EXPERIMENT_SRC_FILENAME,
+        rescaler=0.0,
+        output_filename='embeddedscalars-paramexplore-binary.csv',
+        response_transformation=(lambda x : 1.0 if x=='T' else 0.0))
+
+# Not used in the paper:
+def parameter_exploration_likert():
+    parameter_exploration(
+        experiment_src=LIKERT_EXPERIMENT_SRC_FILENAME,
         rescaler=1.0,
-        output_filename='embeddedscalars-paramexplore.csv',
-        response_transformation=(lambda x : int(x))):
+        output_filename='embeddedscalars-paramexplore-binary.csv',
+        response_transformation=(lambda x : int(x)))
+
+# General function for the above:
+def parameter_exploration(
+        experiment_src=None,
+        rescaler=None,
+        output_filename=None,
+        response_transformation=None):
     writer = csv.DictWriter(file(output_filename, 'w'), fieldnames=['Experiment', 'Listener', 'lambda', 'depth', 'nullcost'] + ['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'])
     writer.writeheader()    
     # Parameter space:
@@ -390,18 +450,11 @@ def parameter_exploration(
         results = analysis.numeric_analysis()
         for key, vals in results.items():
             vals['Listener'] = key
-            vals['Experiment'] = EXPERIMENT_SRC_FILENAME
+            vals['Experiment'] = experiment_src
             vals['lambda'] = temperature
             vals['depth'] = n
             vals['nullcost'] = nullcost        
             writer.writerow(vals)
-
-def parameter_exploration_binary():
-    parameter_exploration(
-        experiment_src="basketball-binary-version-pilot-4-1-15-results-parsed.csv",
-        rescaler=0.0,
-        output_filename='embeddedscalars-paramexplore-binary.csv',
-        response_transformation=(lambda x : 1.0 if x=='T' else 0.0))
 
 def parameter_exploration_summary(src_filename=None):
     reader = csv.DictReader(file(src_filename))
@@ -417,8 +470,8 @@ def parameter_exploration_summary(src_filename=None):
         for measure in measures:
             params = summary[measure]
             rows.append([lisname, measure] + [y for x, y in sorted(params.items(), reverse=True)])
-    return "\\\\\n".join([" & ".join(map(str, row)) for row in rows])
-
+    print "\\\\\n".join([" & ".join(map(str, row)) for row in rows])
+            
 def process_listener_by_param(lisdict):
     measures = [
         ('Pearson', max, 2),
@@ -438,30 +491,35 @@ def process_listener_by_param(lisdict):
 
 if __name__ == '__main__':
 
-    pass
+    ## Figure 2
+    simple_scalar_inference_example()
 
-    # simple_scalar_inference_example()
-    # complex_example()
-    #embedded_disjunction_example(refinable={})
-    #embedded_disjunction_example(refinable={'hit_shot1_or_shot2': ['hit_shot1_and_shot2']})
+    ## Table 2, with and without refinement:
     # scalar_disjunction_example(refinable={'some_shot': ['only_some_shot'], 'OR':['XOR'] })
     # scalar_disjunction_example(refinable={})    
-    # experiment_plot_and_report()
-    # experimental_assessment()
-    # parameter_exploration()
-    # parameter_exploration_binary()
-    # print parameter_exploration_summary(src_filename='embeddedscalars-paramexplore-binary.csv')
-    #unconstrained_parameter_exploration()
-    #experiment_plot_and_report_binary()
-    #experimental_assessment_binary()
 
-    # experimental_assessment(
-    #     experiment_src='basketball-binary-version-pilot-4-1-15-results-parsed.csv',
-    #     plot_output_filename='allmodels-paramexplore-binary.pdf',
-    #     response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
-    #     rescaler=0.0,
-    #     uctemp=0.1,
-    #     ucnullcost=1.0,
-    #     ngtemp=0.1,
-    #     ngnullcost=1.0,
-    #     nrows=3)
+    ## Reviewer request (not in the paper):
+    # embedded_disjunction_example(refinable={})
+    # embedded_disjunction_example(refinable={'hit_shot1_or_shot2': ['hit_shot1_and_shot2']})
+
+    ## Tables 3 and 4
+    # complex_example()
+
+    ## Figure 4
+    # experiment_plot_and_report_binary()
+
+    ## Figure 7
+    # experiment_plot_and_report_likert()
+    
+    ## Takes a long time to run the first; 'embeddedscalars-paramexplore-binary.csv' is included:
+    ## parameter_exploration_binary()
+    # parameter_exploration_summary(src_filename='embeddedscalars-paramexplore-binary.csv')
+        
+    ## Figure 5 and tables 5 and 6
+    # experimental_assessment_binary()
+
+    ## Table 8
+    # experimental_assessment_likert()
+
+    ## Figure 6
+    # experimental_assessment_binary_critical_optimal_params()
