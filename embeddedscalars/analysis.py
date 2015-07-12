@@ -12,9 +12,11 @@ from collections import defaultdict
 from itertools import product
 import numpy as np
 from scipy.stats import spearmanr, pearsonr
+from scipy import stats
 from settings import *
 sys.path.append('../')
 from utils import *
+import bootstrap
 
 ######################################################################
 
@@ -39,17 +41,42 @@ class Analysis:
     def rescale_experiment(self):
         self.expmat = rownorm(self.expmat-self.rescaler)
         
-    def overall_analysis(self, digits=4):
-        expvec = self.expmat.flatten()
+    def overall_analysis(self, digits=4, nsims=10000):
+        # Actual experimental vector:
+        expvec = copy(self.expmat.flatten())
+        # Samples for bootstrapped confidence intervals:
+        samples = []
+        for sim_index in range(nsims):
+            self.experiment.sample_target_responses()
+            self.expmat = np.array(self.experiment.target_means2matrix(self.messages, self.worlds))
+            self.rescale_experiment()
+            samples.append(copy(self.expmat.flatten()))
+        # Build the results table:
         rows = []
         for i, lis in enumerate(self.listeners):
+            # Actual correlations from the experiment:
             lisvec = lis.flatten()
             pearson, pearson_p = pearsonr(expvec, lisvec)
-            spearman, spearman_p = spearmanr(expvec, lisvec)
-            err = mse(expvec, lisvec)            
-            rows.append(np.array([pearson, pearson_p, spearman, spearman_p, err]))        
-        display_matrix(np.array(rows), rnames=self.modnames, cnames=['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'], digits=digits)
+            spearman, spearman_p = spearmanr(expvec, lisvec)            
+            err = mse(expvec, lisvec)
+            # Get samples for bootstrapping:
+            sample_pearsons = []
+            sample_spearmans = []
+            sample_errs = []
+            for sample in samples:
+                sample_pearsons.append(pearsonr(sample, lisvec)[0])
+                sample_spearmans.append(spearmanr(sample, lisvec)[0])
+                sample_errs.append(mse(sample, lisvec))
+            p_lower, p_upper = self.get_ci(sample_pearsons)
+            s_lower, s_upper = self.get_ci(sample_spearmans)
+            e_lower, e_upper = self.get_ci(sample_errs)
+            rows.append(np.array([pearson, p_lower, p_upper, pearson_p, spearman, s_lower, s_upper, spearman_p, err, e_lower, e_upper]))
+        labels = ['Pearson', 'PearsonLower', 'PearsonUpper', 'Pearson p', 'Spearman', 'SpearmanLower', 'SpearmanUpper', 'Spearman p', 'MSE', 'MSELower', 'MSEUpper']
+        display_matrix(np.array(rows), rnames=self.modnames, cnames=labels, digits=digits)
 
+    def get_ci(self, vals, percentiles=[2.5, 97.5]):
+        return np.percentile(vals, percentiles)
+        
     def numeric_analysis(self):
         results = {}
         expvec = self.expmat.flatten()
@@ -58,6 +85,7 @@ class Analysis:
             lisvec = lis.flatten()
             pearson, pearson_p = pearsonr(expvec, lisvec)
             spearman, spearman_p = spearmanr(expvec, lisvec)
+            s_lower, s_upper = correlation_coefficient_ci(spearman, n=observation_count)
             err = mse(expvec, lisvec)
             results[self.modnames[i]] = dict(zip(labels, [pearson, pearson_p, spearman, spearman_p, err]))
         return results
@@ -71,10 +99,11 @@ class Analysis:
             expvec = self.expmat[i]
             for j, lis in enumerate(self.listeners):
                 lisvec = lis[i]
+                observation_count = len(lisvec)
                 pearson, pearson_p = pearsonr(expvec, lisvec)
                 spearman, spearman_p = spearmanr(expvec, lisvec)
                 err = mse(expvec, lisvec)            
-                rows.append(np.array([pearson, pearson_p, spearman, spearman_p, err]))        
+                rows.append(np.array([pearson, pearson_p, spearman, spearman_p, err]))          
         display_matrix(np.array(rows), rnames=rnames, cnames=['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'], digits=digits)
 
     def comparison_plot(self, width=0.2, output_filename=None, nrows=None):

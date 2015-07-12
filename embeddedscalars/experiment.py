@@ -62,10 +62,26 @@ class Experiment:
         self.targets = defaultdict(lambda : defaultdict(list))
         self.get_target_responses()
 
-    def get_target_responses(self):
+    def get_target_responses(self):        
         for item in self.data:
            if item.formula:
-               self.targets[item.formula][item.condition_norm].append(item.response) 
+               self.targets[item.formula][item.condition_norm].append(item.response)
+
+    def sample_target_responses(self):
+        """For bootstrapping confidence intervals, build a simulated data set with by-subjects sampling"""
+        # Organize the data by workerid:
+        byworker = defaultdict(list)
+        for item in self.data:
+            if item.formula:
+                byworker[item.workerid].append((item.formula, item.condition_norm, item.response))
+        # Sample the usual number of workers with replacement:
+        size = len(byworker)
+        workerids = np.random.choice(byworker.keys(), size=size, replace=True, p=None)
+        # Build self.targets with this subsample:
+        self.targets = defaultdict(lambda : defaultdict(list))
+        for workerid in workerids:
+            for formula, condition_norm, response in byworker[workerid]:
+                self.targets[formula][condition_norm].append(response)
 
     def target_means(self):
         return self.target_analysis(func=np.mean)
@@ -176,7 +192,7 @@ class Experiment:
         ax2.set_ylabel('Count')
         plt.show()
                 
-    def plot_targets(self, output_filename=None, all_x_labels=False, xlim=[0.0, 8.0], xticks=range(1,8), xlabel="Human responses"):
+    def plot_targets(self, output_filename=None, all_x_labels=False, xlim=[0.0, 7.0], xticks=range(1,8), xlabel="Human responses"):
         rnames = sorted(self.targets.keys())
         mat = self.target_means2matrix(rnames, CONDITIONS)
         confidence_intervals = self.target_cis2matrix(rnames, CONDITIONS)                        

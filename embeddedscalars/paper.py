@@ -352,7 +352,7 @@ def experimental_assessment(experiment_src=None,
         temperature=ngtemp,
         nullmsg=nullmsg,
         nullcost=ngnullcost)
-        
+
     # Run the models, going only to the first uncertainty listener (n=0):
     ucmod.stream_lexical_uncertainty(n=0)
     neomod.stream_lexical_uncertainty(n=0)
@@ -379,7 +379,7 @@ def parameter_exploration_likert():
     parameter_exploration(
         experiment_src=LIKERT_EXPERIMENT_SRC_FILENAME,
         rescaler=1.0,
-        output_filename='embeddedscalars-paramexplore-binary.csv',
+        output_filename='embeddedscalars-paramexplore-likert.csv',
         response_transformation=(lambda x : int(x)))
 
 # General function for the above:
@@ -492,7 +492,7 @@ def process_listener_by_param(lisdict):
 if __name__ == '__main__':
 
     ## Figure 2
-    simple_scalar_inference_example()
+    # simple_scalar_inference_example()
 
     ## Table 2, with and without refinement:
     # scalar_disjunction_example(refinable={'some_shot': ['only_some_shot'], 'OR':['XOR'] })
@@ -519,7 +519,7 @@ if __name__ == '__main__':
     # experimental_assessment_binary()
 
     ## Table 8
-    # experimental_assessment_likert()
+    experimental_assessment_likert()
 
     ## Figure 6
     # experimental_assessment_binary_critical_optimal_params()
