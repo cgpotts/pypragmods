@@ -37,7 +37,7 @@ xtick.major.size: 0
 
 ytick.color: black
 ytick.direction: out
-ytick.major.pad: 4
+ytick.major.pad: 3
 ytick.major.size: 0
 
 grid.color: EEEEEE

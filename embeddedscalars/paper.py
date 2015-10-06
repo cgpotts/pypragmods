@@ -23,6 +23,8 @@ from experiment import Experiment
 from analysis import Analysis
 from utils import *
 
+IMAGE_FILE_TYPE = '.pdf'
+
 ######################################################################
 # Figure 2
 
@@ -227,14 +229,14 @@ def embedded_disjunction_example(refinable={}):
 def experiment_plot_and_report_binary():    
     experiment_plot_and_report(        
         src_filename=BINARY_EXPERIMENT_SRC_FILENAME,
-        output_filename=BINARY_EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf'),
+        output_filename=BINARY_EXPERIMENT_SRC_FILENAME.replace('.csv', IMAGE_FILE_TYPE),
         response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
         plot_keywordargs={'xlim':[0.0,1.0], 'xlabel':'Percentage True responses', 'xticks':np.arange(0.2, 1.2, .2)})
     
 def experiment_plot_and_report_likert():    
     experiment_plot_and_report(        
         src_filename=LIKERT_EXPERIMENT_SRC_FILENAME,
-        output_filename=LIKERT_EXPERIMENT_SRC_FILENAME.replace('.csv', '.pdf'),
+        output_filename=LIKERT_EXPERIMENT_SRC_FILENAME.replace('.csv', IMAGE_FILE_TYPE),
         response_transformation=(lambda x : int(x)),
         plot_keywordargs={'xlabel':'Mean Likert response'})
 
@@ -264,7 +266,7 @@ def experiment_plot_and_report(
 def experimental_assessment_binary():
     experimental_assessment(
         experiment_src=BINARY_EXPERIMENT_SRC_FILENAME,
-        plot_output_filename="allmodels-binary.pdf",
+        plot_output_filename="allmodels-binary%s" % IMAGE_FILE_TYPE,
         response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
         rescaler=0.0)
 
@@ -272,7 +274,7 @@ def experimental_assessment_binary():
 def experimental_assessment_likert():
     experimental_assessment(
         experiment_src=LIKERT_EXPERIMENT_SRC_FILENAME,
-        plot_output_filename="allmodels-likert.pdf",
+        plot_output_filename="allmodels-likert%s" % IMAGE_FILE_TYPE,
         response_transformation=(lambda x : int(x)),
         rescaler=1.0)
 
@@ -280,7 +282,7 @@ def experimental_assessment_likert():
 def experimental_assessment_binary_critical_optimal_params():
     experimental_assessment(
         experiment_src=BINARY_EXPERIMENT_SRC_FILENAME,
-        plot_output_filename='allmodels-paramexplore-binary.pdf',
+        plot_output_filename='allmodels-paramexplore-binary%s' % IMAGE_FILE_TYPE,
         response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
         rescaler=0.0,
         uctemp=0.1,
@@ -492,7 +494,7 @@ def process_listener_by_param(lisdict):
 if __name__ == '__main__':
 
     ## Figure 2
-    # simple_scalar_inference_example()
+    simple_scalar_inference_example()
 
     ## Table 2, with and without refinement:
     # scalar_disjunction_example(refinable={'some_shot': ['only_some_shot'], 'OR':['XOR'] })
@@ -519,7 +521,7 @@ if __name__ == '__main__':
     # experimental_assessment_binary()
 
     ## Table 8
-    experimental_assessment_likert()
+    # experimental_assessment_likert()
 
     ## Figure 6
     # experimental_assessment_binary_critical_optimal_params()
