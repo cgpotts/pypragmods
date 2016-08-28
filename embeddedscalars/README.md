@@ -5,7 +5,11 @@ Potts, Christopher; Daniel Lassiter; Roger Levy; Michael C. Frank. 2015. [Embedd
 
 ## Code
 
-`paper.py` reproduces all of the figures, tables, and analyses in the paper. It's a good source for illustrations and examples.
+`paper.py` reproduces all of the figures, tables, and analyses in the paper. It's a good source for illustrations and examples:
+
+```python
+python -m pypragmods.embeddedscalars.paper
+```
 
 (`settings.py` contains basic set-up and plotting specs.)
 
