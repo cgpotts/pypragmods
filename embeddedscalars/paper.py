@@ -507,10 +507,11 @@ def parameter_exploration(
                 writer.writerow(vals)
 
 def parameter_exploration_summary(src_filename=None):
-    reader = csv.DictReader(file(src_filename))
-    listeners = defaultdict(list)    
-    for d in reader:
-        listeners[d['Listener']].append(d)
+    listeners = defaultdict(list)
+    with open(src_filename) as src_file:
+        reader = csv.DictReader(src_file)            
+        for d in reader:
+            listeners[d['Listener']].append(d)
     rows = [['Listener', 'Measure', 'Value', 'Nullcost', 'Lambda', 'Depth']]
     lisnames = ['Literal', 'Fixed lexicon', 'Unconstrained', 'NeoGricean']
     measures = ['Pearson', 'Spearman', 'MSE']    
@@ -565,9 +566,9 @@ if __name__ == '__main__':
     ## Figure 7
     # experiment_plot_and_report_likert()
     
-    ## Takes a long time to run the first; 'embeddedscalars-paramexplore-binary.csv' is included:
+    ## Takes a long time to run the first; 'pypragmods/embeddedscalars/embeddedscalars-paramexplore-binary.csv' is included:
     ## parameter_exploration_binary()
-    # parameter_exploration_summary(src_filename='embeddedscalars-paramexplore-binary.csv')
+    # parameter_exploration_summary(src_filename='pypragmods/embeddedscalars/embeddedscalars-paramexplore-binary.csv')
         
     ## Figure 5 and tables 5 and 6
     # experimental_assessment_binary()
