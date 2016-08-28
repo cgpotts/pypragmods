@@ -1,16 +1,23 @@
 #!/usr/bin/env python
 
-######################################################################
-# Compositional lexical uncertainty functions.
-######################################################################
+"""
+Compositional lexical uncertainty functions.
+"""
 
-import sys
+__author__ = "Christopher Potts"
+__version__ = "2.0"
+__license__ = "GNU general public license, version 3"
+__maintainer__ = "Christopher Potts"
+__email__ = "See the author's website"
+
+
 import itertools
 import numpy as np
-from fragment import *
-from settings import NULL
-sys.path.append('../')
-from utils import display_matrix, powerset
+import sys
+
+from pypragmods.embeddedscalars.fragment import *
+from pypragmods.embeddedscalars.settings import NULL
+from pypragmods.utils import display_matrix, powerset
 
 ######################################################################
 
@@ -26,16 +33,16 @@ class UncertaintyGrammars:
         self.nullmsg = nullmsg
         if self.nullmsg:
             messages.append((NULL, None))
-        self.messages, self.formulae = zip(*messages)
+        self.messages, self.formulae = list(zip(*messages))
         self.messages = list(self.messages)
         self.formulae = list(self.formulae)
         self.baselexicon = baselexicon
         self.baselexicon_mat = self.interpretation_matrix(self.baselexicon)
         
     def lexicon_iterator(self):
-        words, refinements = zip(*self.get_all_refinements().items())
+        words, refinements = list(zip(*list(self.get_all_refinements().items())))
         for meaning_vector in itertools.product(*refinements):
-            lex = dict(zip(words, meaning_vector))
+            lex = dict(list(zip(words, meaning_vector)))
             mat = self.interpretation_matrix(lex)
             # Lexica containing messages that denote {} need to be filtered on
             # the current formulation of the model:
@@ -43,7 +50,7 @@ class UncertaintyGrammars:
                 yield mat
 
     def interpretation_matrix(self, lexicon):
-        for word, sem in lexicon.items():
+        for word, sem in list(lexicon.items()):
             setattr(sys.modules[__name__], word, sem)
         m = len(self.messages)
         n = len(self.worlds)           
@@ -58,11 +65,11 @@ class UncertaintyGrammars:
  
     def get_all_refinements(self):
         # Make sure we're in the baselexicon namespace:
-        for word, sem in self.baselexicon.items():
+        for word, sem in list(self.baselexicon.items()):
             setattr(sys.modules[__name__], word, sem)
         # Refiments:
         refine = {}
-        for word, semval in self.baselexicon.items():
+        for word, semval in list(self.baselexicon.items()):
             if word in self.refinable:
                 if self.refinable[word]:
                     refine[word] = [semval] + [eval(phi) for phi in self.refinable[word]]

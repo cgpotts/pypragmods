@@ -1,16 +1,23 @@
 #!/usr/bin/env python
 
-######################################################################
-# The logical grammar (base lexicon) used throughout the paper. The
-# code in grammar.py messes with the namespace that it establishes, in
-# order to implement lexical uncertainty in an intuitive way.
-######################################################################
+"""
+The logical grammar (base lexicon) used throughout the paper. The
+code in grammar.py messes with the namespace that it establishes, in
+order to implement lexical uncertainty in an intuitive way.
+"""
 
-import sys
+__author__ = "Christopher Potts"
+__version__ = "2.0"
+__license__ = "GNU general public license, version 3"
+__maintainer__ = "Christopher Potts"
+__email__ = "See the author's website"
+
+
 from itertools import product
-from settings import a, b, c, s1, s2
-sys.path.append('../')
-from utils import powerset
+import sys
+
+from pypragmods.embeddedscalars.settings import a, b, c, s1, s2
+from pypragmods.utils import powerset
 
 ######################################################################
 
@@ -79,7 +86,8 @@ def tv(V, Q, worlds, subjects):
     and combining it with the set of sets Q to return an intensional
     property. The dependence on worlds and subjects is unfortunate but
     I don't see how to avoid it."""    
-    return [[w,x] for w, x in product(worlds, subjects) if [y for w_prime, x_prime, y in V if w_prime == w and x_prime == x] in Q]
+    return [[w,x] for w, x in product(worlds, subjects)
+            if [y for w_prime, x_prime, y in V if w_prime == w and x_prime == x] in Q]
 
 def coord(f, X, Y):
     for x, y, z in f:
@@ -112,20 +120,20 @@ if __name__ == '__main__':
     lex = define_lexicon(player=player, shot=shot, worlds=worlds)
 
     # Import the lexicon into this namespace:
-    for word, sem in lex.items():
+    for word, sem in list(lex.items()):
         setattr(sys.modules[__name__], word, sem)
 
     # Examples:
     for d1, d2 in product(("some", "exactly_one", "every", "no"), repeat=2):
         msg = "%s(player)(hit(%s(shot)))" % (d1, d2)
         formula = "iv(fa(%s, player), tv(hit, fa(%s, shot), worlds, player))" % (d1,  d2)       
-        print msg, [worldname(w) for w in worlds if eval(formula)(w)]
+        print(msg, [worldname(w) for w in worlds if eval(formula)(w)])
 
     # Examples:
     for pn, pred in product(('PlayerA', 'PlayerB', 'PlayerC'), ("missed", "scored", "aced")):
         msg = "%s(%s)" % (pn, pred)
         formula = "iv(%s, %s)" % (pn, pred)
-        print msg, [worldname(w) for w in worlds if eval(formula)(w)]
+        print(msg, [worldname(w) for w in worlds if eval(formula)(w)])
     
     
     

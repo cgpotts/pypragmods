@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 
-######################################################################
-# Common strings and some nuts-and-bolts stuff used in the paper.
-######################################################################
+"""
+Common strings and some nuts-and-bolts stuff used in the paper.
+"""
+
+__author__ = "Christopher Potts"
+__version__ = "2.0"
+__license__ = "GNU general public license, version 3"
+__maintainer__ = "Christopher Potts"
+__email__ = "See the author's website"
+
 
 import matplotlib.pyplot as plt
 import matplotlib
 
-LIKERT_EXPERIMENT_SRC_FILENAME = 'embeddedscalars-experiment-results-likert.csv'
-BINARY_EXPERIMENT_SRC_FILENAME = 'embeddedscalars-experiment-results-binary.csv'
+LIKERT_EXPERIMENT_SRC_FILENAME = 'pypragmods/embeddedscalars/embeddedscalars-experiment-results-likert.csv'
+BINARY_EXPERIMENT_SRC_FILENAME = 'pypragmods/embeddedscalars/embeddedscalars-experiment-results-binary.csv'
 
 ######################################################################
 # Model-theoretic entities:
@@ -19,7 +26,7 @@ s1 = 's1' ; s2 = 's2'
 ######################################################################
 # Plot set-up
 
-plt.style.use('embimp.mplstyle')
+plt.style.use('pypragmods/embeddedscalars/embimp.mplstyle')
 matplotlib.rc('text', usetex=True)
 matplotlib.rc('font', family='serif', serif='times')
 matplotlib.rcParams['text.latex.preamble'] = [r"\usepackage{amsmath}", r'\boldmath']

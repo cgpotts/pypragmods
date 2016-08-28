@@ -1,37 +1,49 @@
 #/usr/bin/env python
 
-######################################################################
-# Examples from 
-#
-# Potts, Christopher and Roget Levy. 2015. Negotiating lexical
-# uncertainty and speaker expertise with disjunction. Proceedings of
-# the 41st Annual Meeting of the Berkeley Linguistics Society.
-#
-# and
-#
-# Levy, Roger and Christopher Potts. 2015. Negotiating lexical
-# uncertainty and expertise with disjunction. Poster presented at the
-# 89th Meeting of the Linguistic Society of America, Portland, OR,
-# January 8-11.
-#
-# ---Christopher Potts
-#
-######################################################################
+"""
+Examples from 
 
-import numpy as np
-import sys
+Potts, Christopher and Roget Levy. 2015. Negotiating lexical
+uncertainty and speaker expertise with disjunction. Proceedings of
+the 41st Annual Meeting of the Berkeley Linguistics Society.
+
+and
+
+Levy, Roger and Christopher Potts. 2015. Negotiating lexical
+uncertainty and expertise with disjunction. Poster presented at the
+89th Meeting of the Linguistic Society of America, Portland, OR,
+January 8-11.
+
+To run some of the examples:
+
+python -m pypragmods.disjunction.bls41
+"""
+
+
+__author__ = "Christopher Potts"
+__version__ = "2.0"
+__license__ = "GNU general public license, version 3"
+__maintainer__ = "Christopher Potts"
+__email__ = "See the author's website"
+
+
 from collections import defaultdict
-import cPickle as pickle
 from itertools import product
 import matplotlib
 import matplotlib.pyplot as plt
-sys.path.append('../')
-from lexica import Lexica, NULL_MSG, DISJUNCTION_SIGN
-from pragmods import Pragmod
-from utils import display_matrix
+import numpy as np
+import pickle
+import sys
 
-plt.style.use('bls41.mplstyle')
-COLORS = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666']
+from pypragmods.lexica import Lexica, NULL_MSG, DISJUNCTION_SIGN
+from pypragmods.pragmods import Pragmod
+from pypragmods.utils import display_matrix
+
+
+plt.style.use('pypragmods/disjunction/bls41.mplstyle')
+
+COLORS = ['#1B9E77', '#D95F02', '#7570B3', '#E7298A',
+          '#66A61E', '#E6AB02', '#A6761D', '#666666']
 
 ######################################################################
 ##### Illustrative examples
@@ -71,8 +83,8 @@ def basic_scalar():
                   alpha=1.0,
                   beta=2.0)
     for lex in lexica:
-        print "=" * 70
-        print mod.lex2str(lex)
+        print("=" * 70)
+        print(mod.lex2str(lex))
         mod.run_base_model(lex, n=2, display=True, digits=2)      
     mod.run_expertise_model(n=3, display=True, digits=2)
           
@@ -85,15 +97,16 @@ def compositional_disjunction():
         nullcost=5.0,
         disjunction_cost=1.0)
     lexica.display()
-    mod = Pragmod(lexica=lexica.lexica2matrices(),
-                  messages=lexica.messages,
-                  states=lexica.states,
-                  costs=lexica.cost_vector(),
-                  prior=np.repeat(1.0/len(lexica.states), len(lexica.states)),
-                  lexprior=np.repeat(1.0/len(lexica), len(lexica)),
-                  temperature=1.0,
-                  alpha=1.0,
-                  beta=1.0)
+    mod = Pragmod(
+        lexica=lexica.lexica2matrices(),
+        messages=lexica.messages,
+        states=lexica.states,
+        costs=lexica.cost_vector(),
+        prior=np.repeat(1.0/len(lexica.states), len(lexica.states)),
+        lexprior=np.repeat(1.0/len(lexica), len(lexica)),
+        temperature=1.0,
+        alpha=1.0,
+        beta=1.0)
     mod.run_expertise_model(n=2, display=True, digits=2)
 
 ######################################################################
@@ -136,10 +149,11 @@ def generic_disjunction_example(
         beta=beta)
     if fulldisplay:
         lexica.display()
-        # Run the base model on the individual lexica so we can show those lower steps:
+        # Run the base model on the individual lexica so we can show
+        # those lower steps:
         for lex in lexmats:
-            print "=" * 70
-            print mod.lex2str(lex)
+            print("=" * 70)
+            print(mod.lex2str(lex))
             mod.run_base_model(lex, n=2, display=True, digits=2)         
     ## Run the anxious experts model - fulldisplay=True for a fuller picture:
     langs = mod.run_expertise_model(n=n, display=fulldisplay, digits=2)
@@ -150,13 +164,29 @@ def generic_disjunction_example(
     return langs
         
 def hurfordian_example(n=2, fulldisplay=False):
-    generic_disjunction_example(alpha=2.0, beta=1.0, disjunction_cost=1.0, n=n, fulldisplay=fulldisplay)
+    generic_disjunction_example(
+        alpha=2.0,
+        beta=1.0,
+        disjunction_cost=1.0,
+        n=n,
+        fulldisplay=fulldisplay)
         
 def definitional_example(n=2, fulldisplay=False):
-    generic_disjunction_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay)
+    generic_disjunction_example(
+        alpha=5.0,
+        beta=7.0,
+        disjunction_cost=0.01,
+        n=n,
+        fulldisplay=fulldisplay)
 
 def focal_definitional_example(n=2, fulldisplay=False):
-    generic_disjunction_example(alpha=5.0, beta=7.0, disjunction_cost=0.01, n=n, fulldisplay=fulldisplay, unknown_word='X')
+    generic_disjunction_example(
+        alpha=5.0,
+        beta=7.0,
+        disjunction_cost=0.01,
+        n=n,
+        fulldisplay=fulldisplay,
+        unknown_word='X')
 
 ######################################################################
 
@@ -171,20 +201,36 @@ def Q_implicature_simulation(output_filename="Q-implicature-simulation"):
     SPECIFIC_REF = r'w_{\textsc{specific}}'
     DISJ_REF = r'%s v %s' % (GENERAL_ONLY_REF, SPECIFIC_REF)
     # Common structures:
-    BASELEXICON = {GENERAL_MSG: [GENERAL_ONLY_REF, SPECIFIC_REF], SPECIFIC_MSG: [SPECIFIC_REF]}
+    BASELEXICON = {GENERAL_MSG: [GENERAL_ONLY_REF, SPECIFIC_REF],
+                   SPECIFIC_MSG: [SPECIFIC_REF]}
        
     ##### General function for getting data points:
-    def Q_implicature_simulation_datapoint(specific_cost, dcost=1.0, alpha=2.0):
+    def Q_implicature_simulation_datapoint(
+            specific_cost, dcost=1.0, alpha=2.0):
         # Values to obtain:
         is_max = False
         listener_val = None
         speaker_val = None
         # Set-up:
-        lexica = Lexica(baselexicon=BASELEXICON, costs={GENERAL_MSG: 0.0, SPECIFIC_MSG: specific_cost}, join_closure=True, nullsem=True, nullcost=5.0, disjunction_cost=dcost)
+        lexica = Lexica(
+            baselexicon=BASELEXICON,
+            costs={GENERAL_MSG: 0.0, SPECIFIC_MSG: specific_cost},
+            join_closure=True,
+            nullsem=True,
+            nullcost=5.0,
+            disjunction_cost=dcost)
         ref_probs = np.repeat(1.0/len(lexica.states), len(lexica.states))
-        lexprior = np.repeat(1.0/len(lexica.lexica2matrices()), len(lexica.lexica2matrices()))
+        lexprior = np.repeat(1.0/len(lexica.lexica2matrices()),
+                             len(lexica.lexica2matrices()))
         # Run the model:
-        mod = Pragmod(lexica=lexica.lexica2matrices(), messages=lexica.messages, states=lexica.states, costs=lexica.cost_vector(), lexprior=lexprior, prior=ref_probs, alpha=alpha)
+        mod = Pragmod(
+            lexica=lexica.lexica2matrices(),
+            messages=lexica.messages,
+            states=lexica.states,
+            costs=lexica.cost_vector(),
+            lexprior=lexprior,
+            prior=ref_probs,
+            alpha=alpha)
         langs = mod.run_expertise_model(n=3, display=False, digits=2)
         # Get the values we need:
         speaker = mod.speaker_lexical_marginalization(langs[-2])
@@ -195,22 +241,26 @@ def Q_implicature_simulation(output_filename="Q-implicature-simulation"):
         disj_msg_index = lexica.messages.index(DISJ_MSG)
         speaker_val = speaker[disj_state_index, disj_msg_index]
         listener_val = listener[general_msg_index, general_only_state]
-        # Determine whether max, with a bit of rounding to avoid spurious mismatch diagnosis:
+        # Determine whether max, with a bit of rounding to avoid spurious
+        # mismatch diagnosis:
         maxspkval = np.max(speaker[disj_state_index])
         is_max = np.round(speaker_val, 10) == np.round(maxspkval, 10)
         # Return values:
         return (listener_val, speaker_val, is_max)
 
     ##### Plot creation:
-    matplotlib.rc('font', family='serif', serif='times') # Not sure why this has to be set to get the legend font to change.
+    # Not sure why this has to be set to get the legend font to change.
+    matplotlib.rc('font', family='serif', serif='times')
     # Values to vary:
     specific_costs = [0.0,1.0,2.0,3.0,4.0]
     disjunction_costs = np.arange(0.0, 5.0, 1)
     alphas = np.array([1.0, 2.0, 3.0, 4.0])    
     # Panels:
-    variable_lookup = {r'C(\textit{or})': disjunction_costs, r'\alpha': alphas}
+    variable_lookup = {r'C(\textit{or})': disjunction_costs,
+                       r'\alpha': alphas}
     variable_filename_suffixes = ['alphas', 'or']
-    ylims = {r'C(\textit{or})':  [-0.05, 0.45], r'\alpha': [0.15, 0.75]}    
+    ylims = {r'C(\textit{or})': [-0.05, 0.45],
+             r'\alpha': [0.15, 0.75]}    
     for variable_name, suffix in zip(variable_lookup, variable_filename_suffixes):
         # Figure set-up:
         fig, ax = plt.subplots(nrows=1, ncols=1)
@@ -234,24 +284,37 @@ def Q_implicature_simulation(output_filename="Q-implicature-simulation"):
                 alpha = variable
             vals = []
             for cost in specific_costs:
-                vals.append(Q_implicature_simulation_datapoint(cost, dcost=dcost, alpha=alpha))
-            listener_vals, speaker_vals, _ = zip(*vals)                
+                vals.append(
+                    Q_implicature_simulation_datapoint(
+                        cost, dcost=dcost, alpha=alpha))
+            listener_vals, speaker_vals, _ = list(zip(*vals))                
             max_booleans = [(i, j) for i, j, is_max in vals if is_max]            
             # Plotting (multiple lines with max-value annotations)
             ax.plot(listener_vals, speaker_vals, color=color, linewidth=2)
             if max_booleans:
-                maxx, maxy = zip(*max_booleans)
+                maxx, maxy = list(zip(*max_booleans))
                 ax.plot(maxx, maxy, linestyle=':', linewidth=6, color=color)
-            ax.annotate(r'$%s = %s$' % (variable_name, variable), xy=(listener_vals[ann_index]*ann_adj, speaker_vals[ann_index]), fontsize=16, ha=ha, va=va, color=color)
+            ax.annotate(
+                r'$%s = %s$' % (variable_name, variable),
+                xy=(listener_vals[ann_index]*ann_adj, speaker_vals[ann_index]),
+                fontsize=16,
+                ha=ha,
+                va=va,
+                color=color)
         # Axes:
-        ax.set_xlabel(r'$L_1(%s \mid \textit{%s})$' % (GENERAL_ONLY_REF, GENERAL_MSG), fontsize=18)
-        ax.set_ylabel(r'$S_2(\textit{%s} \mid %s)$' % (DISJ_MSG.replace(' v ', r' or '), DISJ_REF.replace(' v ', r' \vee ')), fontsize=18)        
+        ax.set_xlabel(r'$L_1(%s \mid \textit{%s})$' % (
+            GENERAL_ONLY_REF, GENERAL_MSG),
+            fontsize=18)
+        ax.set_ylabel(r'$S_2(\textit{%s} \mid %s)$' % (
+            DISJ_MSG.replace(' v ', r' or '), DISJ_REF.replace(' v ', r' \vee ')),
+            fontsize=18)
         ax.set_xlim([0.2, 1.05])   
         ax.set_ylim([0.0, 1.05])
         # Save the panel:
         plt.setp(ax.get_xticklabels(), fontsize=16)
         plt.setp(ax.get_yticklabels(), fontsize=16)
-        plt.savefig("%s-%s.pdf" % (output_filename, suffix), bbox_inches='tight')
+        plt.savefig("%s-%s.pdf" % (output_filename, suffix),
+                    bbox_inches='tight')
     
 ######################################################################
 
@@ -267,21 +330,41 @@ def I_implicature_simulation(output_filename="I-implicature-simulation"):
     UNCOMMON_REF = r'r_{\textsc{UNCOMMON}}'
     DISJ_REF = "%s%s%s" % (COMMON_REF, DISJUNCTION_SIGN, UNCOMMON_REF)
     # Common structures:
-    BASELEXICON = {SUPERKIND_MSG: [UNCOMMON_REF, COMMON_REF], COMMON_MSG: [COMMON_REF], UNCOMMON_MSG: [UNCOMMON_REF]}
-    LEXICAL_COSTS = {SUPERKIND_MSG: 0.0, COMMON_MSG: 0.0, UNCOMMON_MSG: 0.0}
+    BASELEXICON = {SUPERKIND_MSG: [UNCOMMON_REF, COMMON_REF],
+                   COMMON_MSG: [COMMON_REF],
+                   UNCOMMON_MSG: [UNCOMMON_REF]}
+    LEXICAL_COSTS = {SUPERKIND_MSG: 0.0,
+                     COMMON_MSG: 0.0,
+                     UNCOMMON_MSG: 0.0}
    
     ##### General function for getting data points:
-    def I_implicature_simulation_datapoint(common_ref_prob, dcost=1.0, alpha=2.0):
+    def I_implicature_simulation_datapoint(
+            common_ref_prob, dcost=1.0, alpha=2.0):
         # Values to obtain:
         is_max = False
         listener_val = None
         speaker_val = None
         # Set-up:
-        lexica = Lexica(baselexicon=BASELEXICON, costs=LEXICAL_COSTS, join_closure=True, nullsem=True, nullcost=5.0, disjunction_cost=dcost)
-        ref_probs = np.array([common_ref_prob, (1.0-common_ref_prob)/2.0, (1.0-common_ref_prob)/2.0])
-        lexprior = np.repeat(1.0/len(lexica.lexica2matrices()), len(lexica.lexica2matrices()))
+        lexica = Lexica(
+            baselexicon=BASELEXICON,
+            costs=LEXICAL_COSTS,
+            join_closure=True,
+            nullsem=True,
+            nullcost=5.0,
+            disjunction_cost=dcost)
+        ref_probs = np.array([common_ref_prob, (1.0-common_ref_prob)/2.0,
+                              (1.0-common_ref_prob)/2.0])
+        lexprior = np.repeat(1.0/len(lexica.lexica2matrices()),
+                             len(lexica.lexica2matrices()))
         # Run the model:
-        mod = Pragmod(lexica=lexica.lexica2matrices(), messages=lexica.messages, states=lexica.states, costs=lexica.cost_vector(), lexprior=lexprior, prior=ref_probs, alpha=alpha)
+        mod = Pragmod(
+            lexica=lexica.lexica2matrices(),
+            messages=lexica.messages,
+            states=lexica.states,
+            costs=lexica.cost_vector(),
+            lexprior=lexprior,
+            prior=ref_probs,
+            alpha=alpha)
         langs = mod.run_expertise_model(n=3, display=False, digits=2)
         # Get the values we need:
         speaker = mod.speaker_lexical_marginalization(langs[-2])
@@ -293,14 +376,16 @@ def I_implicature_simulation(output_filename="I-implicature-simulation"):
         # Fill in listener_val and speaker_val:
         listener_val = listener[superkind_term_index, common_state_index]
         speaker_val = speaker[disj_state_index, disj_term_index]
-        # Determine whether max, with a bit of rounding to avoid spurious mismatch diagnosis:
+        # Determine whether max, with a bit of rounding to avoid
+        # spurious mismatch diagnosis:
         maxspkval = np.max(speaker[disj_state_index])
         is_max = np.round(speaker_val, 10) == np.round(maxspkval, 10)
         # Return values:
         return (listener_val, speaker_val, is_max)
 
     ##### Plot creation:
-    matplotlib.rc('font', family='serif', serif='times') # Not sure why this has to be set to get the legend font to change.
+    # Not sure why this has to be set to get the legend font to change.
+    matplotlib.rc('font', family='serif', serif='times')
     # Values to vary:
     common_ref_probs = np.arange(1.0/3.0, 1.0/1.0, 0.01)
     disjunction_costs = np.arange(1.0, 5.0, 1)
@@ -328,35 +413,57 @@ def I_implicature_simulation(output_filename="I-implicature-simulation"):
                 alpha = variable
             vals = []
             for ref_prob in common_ref_probs:
-                vals.append(I_implicature_simulation_datapoint(ref_prob, dcost=dcost, alpha=alpha))
-            listener_vals, speaker_vals, _ = zip(*vals)                
+                vals.append(
+                    I_implicature_simulation_datapoint(
+                        ref_prob, dcost=dcost, alpha=alpha))
+            listener_vals, speaker_vals, _ = list(zip(*vals))                
             max_booleans = [(i, j) for i, j, is_max in vals if is_max]            
             # Plotting (multiple lines with max-value annotations)
             ax.plot(listener_vals, speaker_vals, color=color, linewidth=2)
             if max_booleans:
-                maxx, maxy = zip(*max_booleans)
+                maxx, maxy = list(zip(*max_booleans))
                 ax.plot(maxx, maxy, linestyle=':', linewidth=6, color=color)
             # Annotation:
-            if variable_name == r'\alpha' and variable == variables[-1]: # Avoid label overlap for alpha=3 and alpha=4.
+            # Avoid label overlap for alpha=3 and alpha=4.
+            if variable_name == r'\alpha' and variable == variables[-1]:
                 va = 'bottom'
-            ax.annotate(r'$%s = %s$' % (variable_name, variable), xy=(listener_vals[0]*0.98, speaker_vals[0]), fontsize=16, ha=ha, va=va, color=color)
+            ax.annotate(
+                r'$%s = %s$' % (variable_name, variable),
+                xy=(listener_vals[0]*0.98, speaker_vals[0]),
+                fontsize=16,
+                ha=ha,
+                va=va,
+                color=color)
             ax.set_ylim(ylims[variable_name])
         # Axes:
-        ax.set_xlabel(r'$L_1(%s \mid \textit{%s})$' % (COMMON_REF, SUPERKIND_MSG), fontsize=18)
-        ax.set_ylabel(r'$S_2(\textit{%s} \mid %s)$' % (DISJ_MSG.replace(' v ', r' or '), DISJ_REF.replace(' v ', r' \vee ')), fontsize=18)
+        ax.set_xlabel(r'$L_1(%s \mid \textit{%s})$' % (
+            COMMON_REF, SUPERKIND_MSG),
+            fontsize=18)
+        ax.set_ylabel(r'$S_2(\textit{%s} \mid %s)$' % (
+            DISJ_MSG.replace(' v ', r' or '), DISJ_REF.replace(' v ', r' \vee ')),
+            fontsize=18)
         ax.set_xlim([0.0,1.0])
         # Save the panel:
         plt.setp(ax.get_xticklabels(), fontsize=16)
         plt.setp(ax.get_yticklabels(), fontsize=16)
-        plt.savefig("%s-%s.pdf" % (output_filename, suffix), bbox_inches='tight')
+        plt.savefig("%s-%s.pdf" % (output_filename, suffix),
+                    bbox_inches='tight')
     
 ######################################################################
 ##### Parameter exploration
 
 class ListenerParameterExperiment:
     def __init__(self,
-            baselexicon={'A': ['1'], 'B': ['2'], 'C': ['3'], 'D': ['4'], 'X': ['1', '2', '3', '4']},
-            lexical_costs={'A':0.0, 'B':0.0, 'C':0.0, 'D':0.0, 'X':0.0},
+            baselexicon={'A': ['1'],
+                         'B': ['2'],
+                         'C': ['3'],
+                         'D': ['4'],
+                         'X': ['1', '2', '3', '4']},
+            lexical_costs={'A':0.0,
+                           'B':0.0,
+                           'C':0.0,
+                           'D':0.0,
+                           'X':0.0},
             unknown_word=None,
             dcosts=np.arange(0.0, 0.21, 0.01),
             alphas=np.arange(0.0, 15.0, 1),
@@ -367,20 +474,60 @@ class ListenerParameterExperiment:
             plot_filename=None,
             logx=True,
             xlim=(-3.0, 3.0)):
-        # Parameter exploration parameters:
-        self.results = results                   # Optionally read in existing results for plotting.
-        self.results_filename = results_filename # Output filename for the pickled results.
-        self.baselexicon = baselexicon           # The basic lexicon to explore.
-        self.lexical_costs = lexical_costs       # Costs for the basic lexicon.
-        self.unknown_word = unknown_word         # If present, then it is presumed by Lexica to be constrained to an atomic meaning.
-        self.dcosts = dcosts                     # Vector of disjunction costs to explore.
-        self.alphas = alphas                     # Vector of alpahs to explore.
-        self.betas = betas                       # Vector of betas to explore.
-        self.depths = depths                     # Vector of integer depths to explore.
-        # Plotting parameters:
-        self.plot_filename = plot_filename       # Optional output filename for the plot; if None, then plt.show().
-        self.logx = logx                         # Should the beta/alpha be put on the log scale (default: True)
-        self.xlim = xlim                         # The current default is good for the current settings.
+        """
+        Parameters
+        ----------
+        
+        results : pickled results as created by `explore_listener_parameters`
+            Optionally read in existing results for plotting.
+
+        results_filename : str
+            Output filename for the pickled results.
+
+        baselexicon : dict with iterable values
+            The basic lexicon to explore.
+
+        lexical_costs : np.array
+            Costs for the basic lexicon.
+
+        unknown_word : str
+            If present, then it is presumed to be constrained to an atomic
+            meaning.
+
+        dcosts : np.array
+            Vector of disjunction costs to explore.
+
+        alphas : np.array
+            Vector of alphas to explore.
+
+        beta : np.array
+            Vector of betas to explore.
+
+        depths : list of int
+            Vector of integer depths to explore.
+
+        plot_filename : str
+            Optional output filename for the plot; if None, then plt.show().
+        
+        logx : bool
+            Should the beta/alpha be put on the log scale (default: True)
+
+        xlim : tuple of float.
+            The current default is good for the current settings.
+
+        """
+        self.results = results
+        self.results_filename = results_filename
+        self.baselexicon = baselexicon
+        self.lexical_costs = lexical_costs
+        self.unknown_word = unknown_word
+        self.dcosts = dcosts
+        self.alphas = alphas
+        self.betas = betas
+        self.depths = depths
+        self.plot_filename = plot_filename
+        self.logx = logx
+        self.xlim = xlim
         # Parameters not exposed because assumed
         # fixed; these are here mainly to avoid
         # mistakes and facilitate future work:
@@ -394,14 +541,16 @@ class ListenerParameterExperiment:
         self.other_cls = 'O'
 
     def run(self):
-        """The main method: parameter exploration if it's not already done, and then the plot"""
+        """The main method: parameter exploration if it's not already
+        done, and then the plot"""
         # If the results are not already computed, get them:
         if not self.results:
             self.results = self.explore_listener_parameters()
             pickle.dump(self.results, file(self.results_filename, 'w'), 2)
         # Classify the parameters into Hurfordian and definitional
         hc = self._get_cls_params(self.hurford_cls, self.hurford_state)
-        defin = self._get_cls_params(self.definitional_cls, self.definitional_state)
+        defin = self._get_cls_params(
+            self.definitional_cls, self.definitional_state)
         # Create the plot:
         self.alpha_beta_cost_scatterplot(hc, defin)
     
@@ -409,8 +558,14 @@ class ListenerParameterExperiment:
         """Explore a large parameter space, classifying the parameter vectors
         based on the max listener <world,lex> inference given self.msg""" 
         results = defaultdict(list)
-        for dcost, alpha, beta, depth in product(self.dcosts, self.alphas, self.betas, self.depths):
-            params = {'alpha': alpha, 'beta': beta, 'depth': depth, 'disjunction_cost': dcost}
+        for dcost, alpha, beta, depth in product(self.dcosts,
+                                                 self.alphas,
+                                                 self.betas,
+                                                 self.depths):
+            params = {'alpha': alpha,
+                      'beta': beta,
+                      'depth': depth,
+                      'disjunction_cost': dcost}
             lexica = Lexica(
                 baselexicon=self.baselexicon, 
                 costs=self.lexical_costs,
@@ -440,13 +595,14 @@ class ListenerParameterExperiment:
             max_prob = sorted_probs[-1]
             # No ties allowed!
             if max_prob != sorted_probs[-2]:
-                for i, j in product(range(prob_table.shape[0]), range(prob_table.shape[1])):
+                for i, j in product(list(range(prob_table.shape[0])),
+                                    list(range(prob_table.shape[1]))):
                     if prob_table[i, j] == max_prob:
                         max_pair = (i, mod.states[j])
             # Add the target probability:
             params['prob'] = max_prob
             # Print to show progress:
-            print max_pair, params
+            print(max_pair, params)
             # Store this dictionary of results -- parameters plus the predicted probability
             # max_pair is a lexicon index and state name.
             results[max_pair].append(params)
@@ -476,9 +632,11 @@ class ListenerParameterExperiment:
         return cls_lex
 
     def alpha_beta_cost_scatterplot(self, hc, defin):
-        """Create the scatterplot with beta/alpha on the x-axis and disjunction costs on the y-axis"""
+        """Create the scatterplot with beta/alpha on the x-axis and
+        disjunction costs on the y-axis"""
         # Set-up:
-        matplotlib.rc('font', family='serif', serif='times') # Not sure why this has to be set to get the legend font to change.
+        # Not sure why this has to be set to get the legend font to change.
+        matplotlib.rc('font', family='serif', serif='times')
         transform = np.log if self.logx else (lambda x : x)    
         fig, ax = plt.subplots(nrows=1, ncols=1)
         fig.set_figheight(10)
@@ -494,17 +652,26 @@ class ListenerParameterExperiment:
         d_ba = [r['beta']/r['alpha'] for r in defin]
         d_g = [r['disjunction_cost'] for r in defin]        
         # Both (if any):
-        both = [(x,y) for x, y in zip(d_ba, d_g) if (x,y) in zip(h_ba, h_g)]
+        both = [(x,y) for x, y in zip(d_ba, d_g) if (x,y) in list(zip(h_ba, h_g))]
         b_ba = []; b_g = []
         if both:
-            b_ba, b_g = zip(*both)
+            b_ba, b_g = list(zip(*both))
         # Remove overlap:
-        h_ba, h_g = zip(*[(x,y) for x,y in zip(h_ba, h_g) if (x,y) not in both])
-        d_ba, d_g = zip(*[(x,y) for x,y in zip(d_ba, d_g) if (x,y) not in both])                        
+        h_ba, h_g = list(zip(*[(x,y) for x,y in zip(h_ba, h_g) if (x,y) not in both]))
+        d_ba, d_g = list(zip(*[(x,y) for x,y in zip(d_ba, d_g) if (x,y) not in both]))                        
         # Plotting:
-        for i, vals in enumerate(((h_ba, h_g, 'Hurfordian'), (d_ba, d_g, 'Definitional'), (b_ba, b_g, 'Both'))):
+        for i, vals in enumerate(((h_ba, h_g, 'Hurfordian'),
+                                  (d_ba, d_g, 'Definitional'),
+                                  (b_ba, b_g, 'Both'))):
             x, y, label = vals
-            ax.plot(self.jitter(transform(x)), self.jitter(y), linestyle="", marker=".", label=label, markersize=markersize, color=colors[i])
+            ax.plot(
+                self.jitter(transform(x)),
+                self.jitter(y),
+                linestyle="",
+                marker=".",
+                label=label,
+                markersize=markersize,
+                color=colors[i])
         # Labeling:
         xlab = r"\beta/\alpha"    
         if self.logx:
@@ -539,26 +706,28 @@ if __name__ == '__main__':
 
     ## Some simple warm-up examples:
     simple_disjunction()
-    # basic_scalar()
-    # compositional_disjunction()
+    basic_scalar()
+    compositional_disjunction()
 
     ## From the poster:
-    # hurfordian_example(n=2, fulldisplay=False)
-    # definitional_example(n=3, fulldisplay=True)
-    # focal_definitional_example(n=2, fulldisplay=False)
+    hurfordian_example(n=2, fulldisplay=False)
+    definitional_example(n=3, fulldisplay=True)
+    focal_definitional_example(n=2, fulldisplay=False)
 
     ## Implicature blocking
-    # Q_implicature_simulation()
-    # I_implicature_simulation()        
+    Q_implicature_simulation()
+    I_implicature_simulation()        
     
-    # Parameter exploration with a large lexicon; this takes a long time to run!
+    # Parameter exploration with a large lexicon;
+    # this takes a long time to run!
     # ListenerParameterExperiment(
     #     results_filename='paramexplore-lex5.pickle',
     #     # If the results are already computed:
     #     results=pickle.load(file("paramexplore-lex5.pickle")),
     #     plot_filename='paramexplore-lex5.pdf').run()
 
-    # # Parameter exploration as above but constraining the unknown word X to an atomic meaning:
+    # Parameter exploration as above but constraining
+    # the unknown word X to an atomic meaning:
     # ListenerParameterExperiment(
     #     results_filename='paramexplore-lex5-focal.pickle',
     #     # If the results are already computed:

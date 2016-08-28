@@ -1,7 +1,15 @@
 #/usr/bin/env python
 
+__author__ = "Christopher Potts"
+__version__ = "2.0"
+__license__ = "GNU general public license, version 3"
+__maintainer__ = "Christopher Potts"
+__email__ = "See the author's website"
+
+
 import numpy as np
 from itertools import combinations
+
 
 def rownorm(mat):
     """Row normalization of a matrix"""
@@ -36,15 +44,17 @@ def display_matrix(mat, rnames=None, cnames=None, title='', digits=4, latex=Fals
         s += r"\toprule" + "\n"
     mat = np.round(mat, digits)      
     # Matrix with even-width columns wide enough for the data:
-    s += ''.rjust(rowlabelwidth) + divider + divider.join([str(s).rjust(cwidth) for s in cnames]) + linebreak
+    headercontents = divider.join([str(s).rjust(cwidth) for s in cnames])
+    s += ''.rjust(rowlabelwidth) + divider + headercontents + linebreak
     if latex:
         s += r"\midrule" + "\n" 
-    for i in range(mat.shape[0]):  
-        s += str(rnames[i]).rjust(rowlabelwidth) + divider + divider.join(str(x).rjust(cwidth) for x in mat[i, :]) + linebreak
+    for i in range(mat.shape[0]):
+        rowcontents = divider.join(str(x).rjust(cwidth) for x in mat[i, :])
+        s += str(rnames[i]).rjust(rowlabelwidth) + divider + rowcontents + linebreak
     if latex:
         s += r"\bottomrule" + "\n"
         s += r"\end{tabular}"
-    print s
+    print(s)
         
 def powerset(x, minsize=0, maxsize=None):
     result = []

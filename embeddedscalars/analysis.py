@@ -1,22 +1,30 @@
 #!/usr/bin/env python
 
-######################################################################
-# Functions for analyzing models against experimental data using the
-# techniques described in the paper. For examples, see paper.py
-######################################################################
+"""
+Functions for analyzing models against experimental data using the
+techniques described in the paper. For examples, see `paper.py`
+"""
 
-import sys
-import csv
+__author__ = "Christopher Potts"
+__version__ = "2.0"
+__license__ = "GNU general public license, version 3"
+__maintainer__ = "Christopher Potts"
+__email__ = "See the author's website"
+
+
 from copy import copy
 from collections import defaultdict
+import csv
 from itertools import product
 import numpy as np
 from scipy.stats import spearmanr, pearsonr
 from scipy import stats
-from settings import *
-sys.path.append('../')
-from utils import *
-import bootstrap
+import sys
+
+from pypragmods.embeddedscalars import bootstrap
+from pypragmods.embeddedscalars.settings import *
+from pypragmods.utils import *
+
 
 ######################################################################
 
@@ -70,9 +78,17 @@ class Analysis:
             p_lower, p_upper = self.get_ci(sample_pearsons)
             s_lower, s_upper = self.get_ci(sample_spearmans)
             e_lower, e_upper = self.get_ci(sample_errs)
-            rows.append(np.array([pearson, p_lower, p_upper, pearson_p, spearman, s_lower, s_upper, spearman_p, err, e_lower, e_upper]))
-        labels = ['Pearson', 'PearsonLower', 'PearsonUpper', 'Pearson p', 'Spearman', 'SpearmanLower', 'SpearmanUpper', 'Spearman p', 'MSE', 'MSELower', 'MSEUpper']
-        display_matrix(np.array(rows), rnames=self.modnames, cnames=labels, digits=digits)
+            rows.append(np.array([pearson, p_lower, p_upper, pearson_p,
+                                  spearman, s_lower, s_upper, spearman_p,
+                                  err, e_lower, e_upper]))
+        labels = ['Pearson', 'PearsonLower', 'PearsonUpper', 'Pearson p',
+                  'Spearman', 'SpearmanLower', 'SpearmanUpper', 'Spearman p',
+                  'MSE', 'MSELower', 'MSEUpper']
+        display_matrix(
+            np.array(rows),
+            rnames=self.modnames,
+            cnames=labels,
+            digits=digits)
 
     def get_ci(self, vals, percentiles=[2.5, 97.5]):
         return np.percentile(vals, percentiles)
@@ -87,14 +103,15 @@ class Analysis:
             spearman, spearman_p = spearmanr(expvec, lisvec)
             s_lower, s_upper = correlation_coefficient_ci(spearman, n=observation_count)
             err = mse(expvec, lisvec)
-            results[self.modnames[i]] = dict(zip(labels, [pearson, pearson_p, spearman, spearman_p, err]))
+            results[self.modnames[i]] = dict(list(zip(labels, [pearson, pearson_p, spearman, spearman_p, err])))
         return results
     	
     def analysis_by_message(self, digits=4):
         rows = []
         msglen = max([len(x) for x in self.messages])
         modlen = max([len(x) for x in self.modnames])
-        rnames = [msg.rjust(msglen)+" "+ mod.rjust(modlen) for msg, mod in product(self.messages, self.modnames)]
+        rnames = [msg.rjust(msglen)+" "+ mod.rjust(modlen)
+                  for msg, mod in product(self.messages, self.modnames)]
         for i, msg in enumerate(self.messages):        
             expvec = self.expmat[i]
             for j, lis in enumerate(self.listeners):
@@ -104,7 +121,11 @@ class Analysis:
                 spearman, spearman_p = spearmanr(expvec, lisvec)
                 err = mse(expvec, lisvec)            
                 rows.append(np.array([pearson, pearson_p, spearman, spearman_p, err]))          
-        display_matrix(np.array(rows), rnames=rnames, cnames=['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'], digits=digits)
+        display_matrix(
+            np.array(rows),
+            rnames=rnames,
+            cnames=['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'],
+            digits=digits)
 
     def comparison_plot(self, width=0.2, output_filename=None, nrows=None):
         # Preferred: human left, then models from best to worse, informally:
@@ -122,16 +143,40 @@ class Analysis:
         fig.text(0.5, 0.05, 'Probability', ha='center', va='center', fontsize=30)
         fig.text(0.08, 0.5, 'World', ha='center', va='center', rotation='vertical', fontsize=30)
         # Human column, then model columns:
-        self.model_comparison_plot(axarray[:,0], self.expmat, width=width, color=colors[0], modname='Human', left=True, right=False, nrows=nrows)
+        self.model_comparison_plot(
+            axarray[:,0],
+            self.expmat,
+            width=width,
+            color=colors[0],
+            modname='Human',
+            left=True,
+            right=False,
+            nrows=nrows)
         for i, lis in enumerate(listeners):
-            self.model_comparison_plot(axarray[: , i+1], lis, width=width, color=colors[-(i+1)], modname=modnames[i], left=False, right=i==ncols-2, nrows=nrows)
+            self.model_comparison_plot(
+                axarray[: , i+1],
+                lis,
+                width=width,
+                color=colors[-(i+1)],
+                modname=modnames[i],
+                left=False,
+                right=i==ncols-2,
+                nrows=nrows)
         # Output:
         if output_filename:
             plt.savefig(output_filename, bbox_inches='tight')
         else:
             plt.show()
 
-    def model_comparison_plot(self, axarray, modmat, width=1.0, color='black', modname=None, left=False, right=False, nrows=None):
+    def model_comparison_plot(self,
+            axarray,
+            modmat,
+            width=1.0,
+            color='black',
+            modname=None,
+            left=False,
+            right=False,
+            nrows=None):
         # Preferred ordering puts the embedded 'some' sentences last:
         message_ordering_indices = [0,3,6,1,4,7,2,5,8]
         if nrows:
@@ -158,16 +203,27 @@ class Analysis:
             msg = msgs[j]            
             row = modmat[j]
             row = row[::-1] # Reversal for preferred ordering.
-            ax.tick_params(axis='both', which='both', bottom='off', left='off', top='off', right='off')            
+            ax.tick_params(
+                axis='both',
+                which='both',
+                bottom='off',
+                left='off',
+                top='off',
+                right='off')            
             ax.barh(pos, row, width, color=color)
             # title as model name:
             if j == 0:
-                ax.set_title(r"\textbf{%s}" % modname, fontsize=title_size, color=color, fontweight='bold')                
+                ax.set_title(
+                    r"\textbf{%s}" % modname,
+                    fontsize=title_size,
+                    color=color,
+                    fontweight='bold')
             # x-axis
             ax.set_xlim(xlim)            
             ax.set_xticks(xticks)
             if j == len(axarray)-1:
-                ax.set_xticklabels(xtick_labels, fontsize=xtick_labelsize, color='black')
+                ax.set_xticklabels(
+                    xtick_labels, fontsize=xtick_labelsize, color='black')
             else:
                 ax.set_xticklabels([])
             # y-axis:
@@ -177,7 +233,8 @@ class Analysis:
             ax.set_ylim(ylim)
             ax.set_yticks(yticks)
             if left:
-                ax.set_yticklabels(ytick_labels, fontsize=ytick_labelsize, color='black')
+                ax.set_yticklabels(
+                    ytick_labels, fontsize=ytick_labelsize, color='black')
             else:
                 ax.set_yticklabels([])            
 

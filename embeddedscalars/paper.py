@@ -1,27 +1,38 @@
 #!/usr/bin/env python
 
-######################################################################
-# Functions for all of the figures and tables in the paper. The
-# functions themselves are called as part of the main method, but
-# only simple_scalar_inference_example is currently commented in.
-######################################################################
+"""
+Functions for all of the figures and tables in the paper. The
+functions themselves are called as part of the main method, but
+only simple_scalar_inference_example is currently commented in.
 
-import csv
-import sys
-sys.path.append('../')
-import numpy as np
-from copy import copy
-from itertools import product
+python -m pypragmods.embeddedscalars.paper
+"""
+
+__author__ = "Christopher Potts"
+__version__ = "2.0"
+__license__ = "GNU general public license, version 3"
+__maintainer__ = "Christopher Potts"
+__email__ = "See the author's website"
+
+
 from collections import defaultdict
+from copy import copy
+import csv
+from itertools import product
+import numpy as np
 from operator import itemgetter
-from grammar import UncertaintyGrammars
-from pragmods import Pragmod
-from settings import BINARY_EXPERIMENT_SRC_FILENAME, LIKERT_EXPERIMENT_SRC_FILENAME
-from settings import a, b, c, s1, s2 # model-theoretic entities
-from fragment import *
-from experiment import Experiment
-from analysis import Analysis
-from utils import *
+import sys
+
+from pypragmods.utils import *
+from pypragmods.embeddedscalars.grammar import UncertaintyGrammars
+from pypragmods.pragmods import Pragmod
+from pypragmods.embeddedscalars.settings import (
+    BINARY_EXPERIMENT_SRC_FILENAME, LIKERT_EXPERIMENT_SRC_FILENAME)
+from pypragmods.embeddedscalars.settings import a, b, c, s1, s2 # model-theoretic entities
+from pypragmods.embeddedscalars.fragment import *
+from pypragmods.embeddedscalars.experiment import Experiment
+from pypragmods.embeddedscalars.analysis import Analysis
+
 
 IMAGE_FILE_TYPE = '.pdf'
 
@@ -49,14 +60,14 @@ def simple_scalar_inference_example():
     mod.stream_lexical_uncertainty(n=0)
 
     for lex in lexicon_iterator():
-        print "=" * 70
-        print "Messages"
+        print("=" * 70)
+        print("Messages")
         display_matrix(lex, rnames=mod.messages, cnames=mod.states, digits=2)
-        print 'l0'
+        print('l0')
         display_matrix(mod.l0(lex), rnames=mod.messages, cnames=mod.states, digits=2)
-        print 's1'
+        print('s1')
         display_matrix(mod.s1(lex), rnames=mod.states, cnames=mod.messages, digits=2)
-        print 'l1'
+        print('l1')
         display_matrix(mod.L(mod.S(lex)), rnames=mod.messages, cnames=mod.states, digits=2)        
 
     display_matrix(mod.final_listener,  rnames=mod.messages, cnames=mod.states, digits=2)
@@ -75,17 +86,22 @@ def scalar_disjunction_example(refinable={}):
         "shot1": [['1']],
         "shot2": [['2']],
         "the_freethrow": [X for X in powerset(shots) if 'f' in X],
-        "hit":    [[w, x, y] for w, x, y in product(worlds, players, shots) if y in set(w[players.index(x)])],
+        "hit":    [[w, x, y] for w, x, y in product(worlds, players, shots)
+                   if y in set(w[players.index(x)])],
         "some_shot": [Y for Y in powerset(shots) if len(set(regular_shots) & set(Y)) > 0],
         "only_some_shot": [Y for Y in powerset(shots) if len(set(regular_shots) & set(Y)) == 1],
         "every_shot": [Y for Y in powerset(shots) if set(regular_shots) <= set(Y)],
-        "not_every_shot": [Y for Y in powerset(set(shots)) if not(set(regular_shots) <= set(Y))],
-        "AND": [[X, Y, [z for z in X if z in Y]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)],
-        "OR": [[X, Y, [z for z in X]+[z for z in Y if z not in X]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)],
-        "XOR": [[X, Y, [z for z in X if z not in Y]+[z for z in Y if z not in X]] for X, Y in product(list(powerset(powerset(shots))), repeat=2)]}
+        "not_every_shot": [Y for Y in powerset(set(shots))
+                           if not(set(regular_shots) <= set(Y))],
+        "AND": [[X, Y, [z for z in X if z in Y]]
+                for X, Y in product(list(powerset(powerset(shots))), repeat=2)],
+        "OR": [[X, Y, [z for z in X]+[z for z in Y if z not in X]]
+               for X, Y in product(list(powerset(powerset(shots))), repeat=2)],
+        "XOR": [[X, Y, [z for z in X if z not in Y]+[z for z in Y if z not in X]]
+                for X, Y in product(list(powerset(powerset(shots))), repeat=2)]}
 
     # Import the new lexicon into the namespace:
-    for word, sem in lexicon.items():
+    for word, sem in list(lexicon.items()):
         setattr(sys.modules[__name__], word, sem)
     new_worldnames = (lambda x : "".join(map(str,x)))
     worldnames = [new_worldnames(w) for w in worlds]
@@ -149,7 +165,11 @@ def complex_example():
         baselexicon=copy(baselexicon),
         messages=copy(messages),
         worlds=worlds,
-        refinable={'some_player': ['exactly_one_player'], 'PlayerA': ['only_PlayerA'], 'PlayerB': ['only_PlayerB'], 'scored': ['scored_not_aced'], 'aced': []},
+        refinable={'some_player': ['exactly_one_player'],
+                   'PlayerA': ['only_PlayerA'],
+                   'PlayerB': ['only_PlayerB'],
+                   'scored': ['scored_not_aced'],
+                   'aced': []},
         nullmsg=nullmsg)
     neomod = Pragmod(
         lexica=neogram.lexicon_iterator,
@@ -169,7 +189,11 @@ def complex_example():
         baselexicon=copy(baselexicon),
         messages=copy(messages),
         worlds=worlds,
-        refinable={'some_player': [], 'PlayerA': [], 'PlayerB': [], 'scored': [], 'aced': []},
+        refinable={'some_player': [],
+                   'PlayerA': [],
+                   'PlayerB': [],
+                   'scored': [],
+                   'aced': []},
         nullmsg=nullmsg)
     ucmod = Pragmod(
         lexica=ucgram.lexicon_iterator,
@@ -221,7 +245,12 @@ def embedded_disjunction_example(refinable={}):
         nullmsg=nullmsg,
         nullcost=nullcost)
     mod.stream_lexical_uncertainty(n=0)
-    display_matrix(mod.final_listener,  rnames=mod.messages, cnames=mod.states, digits=2, latex=True)
+    display_matrix(
+        mod.final_listener,
+        rnames=mod.messages,
+        cnames=mod.states,
+        digits=2,
+        latex=True)
            
 ######################################################################
 # Figure 4 and figure 7
@@ -231,7 +260,9 @@ def experiment_plot_and_report_binary():
         src_filename=BINARY_EXPERIMENT_SRC_FILENAME,
         output_filename=BINARY_EXPERIMENT_SRC_FILENAME.replace('.csv', IMAGE_FILE_TYPE),
         response_transformation=(lambda x : 1.0 if x=='T' else 0.0),
-        plot_keywordargs={'xlim':[0.0,1.0], 'xlabel':'Percentage True responses', 'xticks':np.arange(0.2, 1.2, .2)})
+        plot_keywordargs={'xlim':[0.0,1.0],
+                          'xlabel':'Percentage True responses',
+                          'xticks':np.arange(0.2, 1.2, .2)})
     
 def experiment_plot_and_report_likert():    
     experiment_plot_and_report(        
@@ -253,11 +284,11 @@ def experiment_plot_and_report(
         'Every player hit some of his shots': [('SSS', 'SSA'), ('SSS', 'SAA'), ('SSA', 'AAA'), ('SAA', 'AAA')],                                                   
         'Exactly one player hit some of his shots': [('NSA', 'SSA'), ('SAA', 'SSA')],                                                         
         'No player hit some of his shots': list(product(('NNS', 'NSA'), ('AAA', 'NNA', 'NAA'))) + [(('NNS','NSA'), ('AAA','NNA','NAA'))]}
-    for sent, pairs in cmps.items():
-        print sent
+    for sent, pairs in list(cmps.items()):
+        print(sent)
         for w1, w2 in pairs:            
             coef, p = exp.pairwise_comparison_test(sent, w1, w2)
-            print "\t%s, %s: W = %s; p = %s" % (w1, w2, np.round(coef, 2), np.round(p, 4))
+            print("\t%s, %s: W = %s; p = %s" % (w1, w2, np.round(coef, 2), np.round(p, 4)))
                                                     
 ######################################################################
 # Assessment
@@ -292,15 +323,16 @@ def experimental_assessment_binary_critical_optimal_params():
         nrows=3)        
 
 # General function for the above:
-def experimental_assessment(experiment_src=None,
-                            plot_output_filename=None,
-                            response_transformation=None,
-                            rescaler=None,
-                            uctemp=1.0,
-                            ucnullcost=5.0,
-                            ngtemp=1.0,
-                            ngnullcost=5.0,
-                            nrows=None):                            
+def experimental_assessment(
+        experiment_src=None,
+        plot_output_filename=None,
+        response_transformation=None,
+        rescaler=None,
+        uctemp=1.0,
+        ucnullcost=5.0,
+        ngtemp=1.0,
+        ngnullcost=5.0,
+        nrows=None):                            
     # General settings:
     subjs= ('every_player', 'exactly_one_player', 'no_player')
     objs = ('every_shot', 'no_shot', 'some_shot')
@@ -343,7 +375,8 @@ def experimental_assessment(experiment_src=None,
         baselexicon=copy(baselexicon),
         messages=copy(messages),
         worlds=copy(worlds),        
-        refinable={'some_player': ['exactly_one_player'], 'some_shot': ['exactly_one_shot']},
+        refinable={'some_player': ['exactly_one_player'],
+                   'some_shot': ['exactly_one_shot']},
         nullmsg=nullmsg)    
     neomod = Pragmod(
         name="Neo-Gricean",
@@ -360,7 +393,12 @@ def experimental_assessment(experiment_src=None,
     neomod.stream_lexical_uncertainty(n=0)
             
     # The analysis:
-    analysis = Analysis(experiment=Experiment(src_filename=experiment_src, response_transformation=response_transformation), models=[ucmod, neomod], rescaler=rescaler)
+    analysis = Analysis(
+        experiment=Experiment(
+            src_filename=experiment_src,
+            response_transformation=response_transformation),
+        models=[ucmod, neomod],
+        rescaler=rescaler)
     analysis.overall_analysis()
     analysis.analysis_by_message()
     analysis.comparison_plot(output_filename=plot_output_filename, nrows=nrows)
@@ -389,9 +427,7 @@ def parameter_exploration(
         experiment_src=None,
         rescaler=None,
         output_filename=None,
-        response_transformation=None):
-    writer = csv.DictWriter(file(output_filename, 'w'), fieldnames=['Experiment', 'Listener', 'lambda', 'depth', 'nullcost'] + ['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'])
-    writer.writeheader()    
+        response_transformation=None):    
     # Parameter space:
     temps = np.concatenate((np.arange(0.1, 2.1, 0.1), np.arange(2.0, 6.0, 1)))
     depths = [0, 1, 2, 3, 4, 5]
@@ -413,50 +449,62 @@ def parameter_exploration(
         msg = "%s(hit(%s))" % (subj, obj)
         formula = "iv(%s, tv(hit, %s, self.worlds, player))" % (d1,  d2)       
         messages.append((msg, formula))
-    # Runs:
-    for temperature, n, nullcost in product(temps, depths, nullcosts):
-        print temperature, n, nullcost
-        neogram = UncertaintyGrammars(
-            baselexicon=copy(baselexicon),
-            messages=copy(messages),
-            worlds=copy(worlds),        
-            refinable={'some_player': ['exactly_one_player'], 'some_shot': ['exactly_one_shot']},
-            nullmsg=nullcost)    
-        neomod = Pragmod(
-            name="NeoGricean",
-            lexica=neogram.lexicon_iterator,
-            baselexicon=neogram.baselexicon_mat,
-            messages=neogram.messages,
-            states=worldnames,
-            temperature=temperature,
-            nullmsg=nullmsg,
-            nullcost=nullcost)
-        ucgram = UncertaintyGrammars(            
-            baselexicon=copy(baselexicon),
-            messages=copy(messages),
-            worlds=copy(worlds),        
-            refinable={'some_player': [], 'some_shot': []},
-            nullmsg=nullcost)    
-        ucmod = Pragmod(
-            name="Unconstrained",
-            lexica=ucgram.lexicon_iterator,
-            baselexicon=ucgram.baselexicon_mat,
-            messages=ucgram.messages,
-            states=worldnames,
-            temperature=temperature,
-            nullmsg=nullmsg,
-            nullcost=nullcost)        
-        ucmod.stream_lexical_uncertainty(n=n)
-        neomod.stream_lexical_uncertainty(n=n)        
-        analysis = Analysis(experiment=Experiment(src_filename=experiment_src, response_transformation=response_transformation), models=[ucmod, neomod], rescaler=rescaler)
-        results = analysis.numeric_analysis()
-        for key, vals in results.items():
-            vals['Listener'] = key
-            vals['Experiment'] = experiment_src
-            vals['lambda'] = temperature
-            vals['depth'] = n
-            vals['nullcost'] = nullcost        
-            writer.writerow(vals)
+
+    with open(output_filename, 'w') as output_file:
+        writer = csv.DictWriter(output_file, 
+            fieldnames=['Experiment', 'Listener', 'lambda', 'depth', 'nullcost'] + \
+            ['Pearson', 'Pearson p', 'Spearman', 'Spearman p', 'MSE'])
+        writer.writeheader()            
+        # Runs:
+        for temperature, n, nullcost in product(temps, depths, nullcosts):
+            print(("{} {} {}".format(temperature, n, nullcost)))
+            neogram = UncertaintyGrammars(
+                baselexicon=copy(baselexicon),
+                messages=copy(messages),
+                worlds=copy(worlds),        
+                refinable={'some_player': ['exactly_one_player'],
+                           'some_shot': ['exactly_one_shot']},
+                nullmsg=nullcost)    
+            neomod = Pragmod(
+                name="NeoGricean",
+                lexica=neogram.lexicon_iterator,
+                baselexicon=neogram.baselexicon_mat,
+                messages=neogram.messages,
+                states=worldnames,
+                temperature=temperature,
+                nullmsg=nullmsg,
+                nullcost=nullcost)
+            ucgram = UncertaintyGrammars(            
+                baselexicon=copy(baselexicon),
+                messages=copy(messages),
+                worlds=copy(worlds),        
+                refinable={'some_player': [], 'some_shot': []},
+                nullmsg=nullcost)    
+            ucmod = Pragmod(
+                name="Unconstrained",
+                lexica=ucgram.lexicon_iterator,
+                baselexicon=ucgram.baselexicon_mat,
+                messages=ucgram.messages,
+                states=worldnames,
+                temperature=temperature,
+                nullmsg=nullmsg,
+                nullcost=nullcost)        
+            ucmod.stream_lexical_uncertainty(n=n)
+            neomod.stream_lexical_uncertainty(n=n)        
+            analysis = Analysis(
+                experiment=Experiment(
+                    src_filename=experiment_src,
+                    response_transformation=response_transformation),
+                models=[ucmod, neomod],
+                rescaler=rescaler)
+            results = analysis.numeric_analysis()
+            for key, vals in list(results.items()):
+                vals['Listener'] = key
+                vals['Experiment'] = experiment_src
+                vals['lambda'] = temperature
+                vals['depth'] = n
+                vals['nullcost'] = nullcost        
+                writer.writerow(vals)
 
 def parameter_exploration_summary(src_filename=None):
     reader = csv.DictReader(file(src_filename))
@@ -471,8 +519,8 @@ def parameter_exploration_summary(src_filename=None):
         summary = process_listener_by_param(lis)
         for measure in measures:
             params = summary[measure]
-            rows.append([lisname, measure] + [y for x, y in sorted(params.items(), reverse=True)])
-    print "\\\\\n".join([" & ".join(map(str, row)) for row in rows])
+            rows.append([lisname, measure] + [y for x, y in sorted(list(params.items()), reverse=True)])
+    print("\\\\\n".join([" & ".join(map(str, row)) for row in rows]))
             
 def process_listener_by_param(lisdict):
     measures = [
@@ -483,10 +531,14 @@ def process_listener_by_param(lisdict):
     for measure, func, digits in measures:
         vals = [float(d[measure]) for d in lisdict]
         best = func(vals)
-        vals = [(float(d['nullcost']), float(d['lambda']), float(d['depth'])) for d in lisdict if float(d[measure]) == best]
+        vals = [(float(d['nullcost']), float(d['lambda']), float(d['depth']))
+                for d in lisdict if float(d[measure]) == best]
         vals = sorted(vals, key=itemgetter(0, 1, 2))
         vals = vals[0]
-        summary[measure] = {'value': round(best, digits), 'nullcost': vals[0], 'lambda': vals[1], 'depth':vals[2]}
+        summary[measure] = {'value': round(best, digits),
+                            'nullcost': vals[0],
+                            'lambda': vals[1],
+                            'depth':vals[2]}
     return summary
                           
 ######################################################################
@@ -525,3 +577,4 @@ if __name__ == '__main__':
 
     ## Figure 6
     # experimental_assessment_binary_critical_optimal_params()
+    
